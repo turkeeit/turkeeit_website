@@ -1,18 +1,16 @@
 import api from "../../api/axiosClient";
+import { HOST } from "../../utils/host";
 
 // Send OTP
 export const getAllServices = (token) => {
   return async (dispatch) => {
     dispatch({ type: "GET_ALL_SERVICES_REQUEST" });
     try {
-      const response = await api.get(
-        "http://139.59.58.233:3000/api/getAllServices",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await api.get(`${HOST}/api/getAllServices`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       console.log("API Response:", response.data);
       dispatch({
@@ -35,15 +33,12 @@ export const getServiceDetails = (serviceId, token) => {
     dispatch({ type: "GET_SERVICE_DETAILS_REQUEST" });
 
     try {
-      const res = await api.get(
-        "http://139.59.58.233:3000/api/getServiceDetails",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            service_id: serviceId, // 👈 HEADER
-          },
-        }
-      );
+      const res = await api.get(`${HOST}/api/getServiceDetails`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          service_id: serviceId, // 👈 HEADER
+        },
+      });
 
       dispatch({
         type: "GET_SERVICE_DETAILS_SUCCESS",

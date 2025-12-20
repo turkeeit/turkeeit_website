@@ -14,6 +14,7 @@ import { addToCart, removeFromCart } from "../redux/actions/cartActions";
 import ServiceDetailsModal from "../components/ServiceDetailsModal";
 import api from "../api/axiosClient";
 import { useNavigate } from "react-router-dom";
+import { HOST } from "../utils/host";
 
 export default function ServiceDetails() {
   const dispatch = useDispatch();
@@ -56,15 +57,12 @@ export default function ServiceDetails() {
     try {
       setModalLoading(true);
 
-      const res = await api.get(
-        "http://139.59.58.233:3000/api/getServiceDetails",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            service_id: id,
-          },
-        }
-      );
+      const res = await api.get(`${HOST}/api/getServiceDetails`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          service_id: id,
+        },
+      });
 
       setModalService(res.data);
       setModalLoading(false);
