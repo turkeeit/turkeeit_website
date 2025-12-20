@@ -1,0 +1,16 @@
+.carousel-control-prev,
+.carousel-control-next {
+  background: transparent;
+  width: 4%;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  filter: invert(1);   /* white icon */
+  opacity: 0.8;
+}
+
+.carousel-control-prev:hover,
+.carousel-control-next:hover {
+  background: rgba(0, 0, 0, 0.1);
+}

@@ -1,5 +1,14 @@
 # Getting Started with Create React App
 
+Folder Purpose
+components/ Reusable UI pieces
+pages/ Whole-page layouts
+api/ Handle all backend calls
+context/ Global app state
+hooks/ Reuse logic (ex: fetch, auth)
+utils/ Helper functions
+assets/ Manage icons, logos, images
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
