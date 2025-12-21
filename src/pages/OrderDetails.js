@@ -1,21 +1,25 @@
 import Header from "../components/Header";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useSelector } from "react-redux";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  getUserDetails,
+  updateUserProfile,
+} from "../redux/actions/authActions";
+import { useDispatch } from "react-redux";
 
 export default function OrderDetails() {
-  const cartItems = useSelector((state) => state.cart.items);
-  const baseService = useSelector((state) => state.services.serviceDetails);
+  const dispatch = useDispatch();
 
-  const [user, setUser] = useState({
-    name: "Nav Kumar",
-    email: "nav@example.com",
-    phone: "+91 99999 99999",
-    address: "123, Green Apartments, MG Road, Bangalore",
-  });
+  const cartItems = useSelector((state) => state.cart.items);
+  const { user } = useSelector((state) => state.auth);
+  const baseService = useSelector((state) => state.services.serviceDetails);
+  const [editName, setEditName] = useState("");
+  const [editGender, setEditGender] = useState("");
 
   const [showModal, setShowModal] = useState(false);
-  const [newAddress, setNewAddress] = useState(user.address);
+
+  const [newAddress, setNewAddress] = useState(user?.address);
 
   const basePrice = Number(baseService?.price || 0);
   const additionalsTotal = cartItems.reduce(
@@ -25,8 +29,38 @@ export default function OrderDetails() {
 
   const total = basePrice + additionalsTotal;
 
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      dispatch(getUserDetails(token));
+    }
+  }, []);
+
+  /* 🔐 Fetch user when profile page opens */
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token && !user) {
+      dispatch(getUserDetails(token));
+    }
+  }, [dispatch, user]);
+
   const handleAddressSave = () => {
-    setUser({ ...user, address: newAddress });
+    if (!newAddress.trim()) {
+      alert("Address cannot be empty");
+      return;
+    }
+    if (!user?.name || !user?.gender) {
+      alert("User profile not loaded yet");
+      return;
+    }
+
+    dispatch(
+      updateUserProfile({
+        name: user?.name,
+        gender: user?.gender,
+        address: newAddress, // ✅ ONLY ADDRESS
+      })
+    );
     setShowModal(false);
   };
 
@@ -79,16 +113,13 @@ export default function OrderDetails() {
               <h6 className="fw-bold mb-3">User Details</h6>
 
               <p className="mb-1">
-                <strong>Name:</strong> {user.name}
+                <strong>Name:</strong> {user?.name}
               </p>
               <p className="mb-1">
-                <strong>Email:</strong> {user.email}
+                <strong>Phone:</strong> {user?.user_id}
               </p>
               <p className="mb-1">
-                <strong>Phone:</strong> {user.phone}
-              </p>
-              <p className="mb-1">
-                <strong>Address:</strong> {user.address}
+                <strong>Address:</strong> {user?.address}
               </p>
 
               <button

@@ -10,8 +10,7 @@ import { groupServicesByCategory } from "../utils/groupServicesByCategory";
 
 export default function Dashboard() {
   const dispatch = useDispatch();
-  const token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtb2JpbGVfbnVtYmVyIjoiOTg2NzMxNTM2MSIsImlhdCI6MTc2NjA1MzAyOSwiZXhwIjoxNzczODI5MDI5fQ.xl29SDnHJVDUzK6MgFV8kSypzCcFn19DH2M0C61gQUg";
+  const token = localStorage.getItem("token");
   const { loading, services, error } = useSelector((state) => state.services);
   console.log("Services from Redux:", services);
   useEffect(() => {

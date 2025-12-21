@@ -4,17 +4,17 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import ServiceDetails from "./pages/ServiceDetails";
 import OrderDetails from "./pages/OrderDetails";
+import Profile from "./pages/Profile";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/service/details" element={<ServiceDetails />} />
-        <Route path="/order/details" element={<OrderDetails />} />
-      </Routes>
-    </Router>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/" element={<Dashboard />} />
+      <Route path="/service/details" element={<ServiceDetails />} />
+      <Route path="/order/details" element={<OrderDetails />} />
+      <Route path="/user/profile" element={<Profile />} />
+    </Routes>
   );
 }
 

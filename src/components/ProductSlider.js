@@ -21,7 +21,9 @@ export default function ProductSlider({ title, services = [] }) {
   return (
     <div className="mt-3" style={{ marginLeft: "20px" }}>
       {/* Title */}
-      <h6 className="mb-2">{title}</h6>
+      <h6 className="mb-2" id={title}>
+        {title}
+      </h6>
 
       {/* Products Row */}
       <div className="container-fluid p-0">
