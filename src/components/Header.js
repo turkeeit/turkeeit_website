@@ -225,6 +225,15 @@ export default function Header() {
                 AC Service{" "}
               </button>
             </li>
+            <li className="nav-item">
+              <button
+                className="nav-link btn px-4"
+                onClick={() => navigate("/blogs")}
+              >
+                {" "}
+                Blogs{" "}
+              </button>
+            </li>
           </ul>
         </div>
       </nav>

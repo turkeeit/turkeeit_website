@@ -10,6 +10,7 @@ export default function ProductSlider({ title, services = [] }) {
   console.log(`Rendering ProductSlider for ${title}:`, services);
 
   const handleClick = (serviceId) => {
+    console.log("Product clicked, serviceId:", serviceId);
     dispatch({
       type: "SET_SELECTED_SERVICE",
       payload: serviceId,

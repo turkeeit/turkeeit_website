@@ -9,10 +9,12 @@ export const sendOtp = (mobile) => async (dispatch) => {
     console.log(`${HOST}/api/sendOtp`);
     await api.post(
       `${HOST}/api/sendOtp`,
-      {},
+      {
+        mobile_number: mobile,
+      },
       {
         headers: {
-          mobile_number: mobile,
+          "Content-Type": "application/json",
         },
       }
     );
@@ -32,11 +34,13 @@ export const verifyOtp = (mobile, otp) => {
     try {
       const res = await api.post(
         `${HOST}/api/verifyOtp`,
-        {},
+        {
+          mobile_number: mobile,
+          otp: otp,
+        },
         {
           headers: {
-            mobile_number: mobile,
-            otp: otp,
+            "Content-Type": "application/json",
           },
         }
       );

@@ -41,6 +41,7 @@ export default function ServiceDetails() {
   const [modalLoading, setModalLoading] = useState(false);
 
   useEffect(() => {
+    console.log("Fetching service details for serviceId:", serviceId);
     if (serviceId) {
       dispatch(getServiceDetails(serviceId, token));
       dispatch(getAllServices(token));
