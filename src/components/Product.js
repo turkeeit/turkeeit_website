@@ -1,5 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import { HOST } from "../utils/host";
 
 export default function Product({ image, name, price, cutPrice, onClick }) {
   return (
@@ -12,7 +13,7 @@ export default function Product({ image, name, price, cutPrice, onClick }) {
           onClick={onClick}
         >
           <img
-            src={`http://139.59.58.233:3000${image}`}
+            src={`${HOST}${image}`}
             className="w-100 rounded"
             style={{
               height: "65px",

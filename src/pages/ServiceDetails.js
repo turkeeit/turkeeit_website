@@ -163,7 +163,7 @@ export default function ServiceDetails() {
                       return (
                         <AdditionalItem
                           key={item.id}
-                          image={`http://139.59.58.233:3000${item.image_url}`}
+                          image={`${HOST}${item.image_url}`}
                           name={item.name}
                           price={`${item.price}`}
                           cutPrice={`${Math.round(item.price * 1.2)}`}
