@@ -58,12 +58,18 @@ export default function ServiceDetails() {
     try {
       setModalLoading(true);
 
-      const res = await api.get(`${HOST}/api/getServiceDetails`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const res = await api.post(
+        `${HOST}/api/getServiceDetails`,
+        {
           service_id: id,
         },
-      });
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       setModalService(res.data);
       setModalLoading(false);
