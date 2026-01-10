@@ -235,6 +235,27 @@ export default function Header() {
               </button>
             </li>
           </ul>
+          <div className="d-flex align-items-center gap-3">
+            {/* Call */}
+            <a
+              href="tel:+919867315361"
+              className="d-flex align-items-center gap-1 text-decoration-none text-dark fw-semibold"
+            >
+              <i className="bi bi-telephone-fill text-primary"></i>
+              +91 98673 15361
+            </a>
+
+            {/* WhatsApp */}
+            <a
+              href="https://wa.me/919867315361"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="d-flex align-items-center gap-1 text-decoration-none text-success fw-semibold"
+            >
+              <i className="bi bi-whatsapp"></i>
+              WhatsApp
+            </a>
+          </div>
         </div>
       </nav>
 

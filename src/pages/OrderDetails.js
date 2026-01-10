@@ -7,6 +7,12 @@ import {
   updateUserProfile,
 } from "../redux/actions/authActions";
 import { useDispatch } from "react-redux";
+import {
+  createOrder,
+  createRazorpayOrder,
+  saveOrderToDB,
+  updateOrderStatus,
+} from "../redux/actions/razorpayActions";
 
 export default function OrderDetails() {
   const dispatch = useDispatch();
@@ -14,6 +20,7 @@ export default function OrderDetails() {
   const cartItems = useSelector((state) => state.cart.items);
   const { user } = useSelector((state) => state.auth);
   const baseService = useSelector((state) => state.services.serviceDetails);
+  const orderRes = useSelector((state) => state.razorpay);
   const [editName, setEditName] = useState("");
   const [editGender, setEditGender] = useState("");
 
@@ -22,10 +29,9 @@ export default function OrderDetails() {
   const [newAddress, setNewAddress] = useState(user?.address);
 
   const basePrice = Number(baseService?.price || 0);
-  const additionalsTotal = cartItems.reduce(
-    (sum, item) => sum + Number(item.price),
-    0
-  );
+  const additionalsTotal = cartItems
+    .filter((item) => item.type === "additional")
+    .reduce((sum, item) => sum + Number(item.price), 0);
 
   const total = basePrice + additionalsTotal;
 
@@ -64,6 +70,64 @@ export default function OrderDetails() {
     setShowModal(false);
   };
 
+  const handlePayment = async (cartItems, address, total) => {
+    console.log(
+      "Initiating payment with cart items:",
+      cartItems,
+      address,
+      total
+    );
+    if (user) {
+      const createOrderRes = await dispatch(
+        createOrder(cartItems, address, total)
+      );
+      console.log("create order  orderRes");
+      console.log(createOrderRes);
+      if (!createOrderRes) return;
+
+      const options = {
+        key: "rzp_test_ZUC1pptTxiGooR",
+        amount: total * 100,
+        currency: "INR",
+        name: "Turkeeit Services",
+        description: `${createOrderRes.order_id} : order payment`,
+        order_id: createOrderRes.razorpay_order_id,
+        handler: function (res) {
+          console.log("Razorpay Payment Response:", createOrderRes);
+          console.log("----- handler payment --");
+          console.log(
+            createOrderRes.order_id,
+            createOrderRes.razorpay_order_id,
+            res.razorpay_payment_id,
+            "PAID"
+          );
+
+          dispatch(
+            updateOrderStatus(
+              createOrderRes.order_id,
+              createOrderRes.razorpay_order_id,
+              res.razorpay_payment_id,
+              "PAID"
+            )
+          );
+
+          alert("Payment successful! Your order is booked 🎉");
+          window.location.href = "/";
+        },
+        prefill: {
+          name: user?.name,
+          contact: user?.user_id,
+          address: user?.address,
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } else {
+      alert("Please SignIn to continue your order");
+    }
+  };
+
   return (
     <>
       <Header />
@@ -76,14 +140,6 @@ export default function OrderDetails() {
           <div className="col-12 col-md-6 mb-3">
             <div className="card shadow-sm rounded-3 p-3">
               <h6 className="fw-bold mb-3">Cart</h6>
-
-              {/* Base Service */}
-              {baseService && (
-                <div className="d-flex justify-content-between mb-2">
-                  <div>{baseService.name}</div>
-                  <div>₹{baseService.price}</div>
-                </div>
-              )}
 
               {/* Additionals */}
               {cartItems.map((item) => (
@@ -103,31 +159,47 @@ export default function OrderDetails() {
                 <span>₹{total}</span>
               </div>
 
-              <button className="btn btn-primary w-100 mt-3">Checkout</button>
+              <button
+                className="btn btn-primary w-100 mt-3"
+                onClick={() => handlePayment(cartItems, user?.address, total)}
+              >
+                Checkout
+              </button>
             </div>
           </div>
 
           {/* USER DETAILS */}
           <div className="col-12 col-md-6 mb-3">
             <div className="card shadow-sm rounded-3 p-3">
-              <h6 className="fw-bold mb-3">User Details</h6>
+              {user ? (
+                <>
+                  <h6 className="fw-bold mb-3">User Details</h6>
 
-              <p className="mb-1">
-                <strong>Name:</strong> {user?.name}
-              </p>
-              <p className="mb-1">
-                <strong>Phone:</strong> {user?.user_id}
-              </p>
-              <p className="mb-1">
-                <strong>Address:</strong> {user?.address}
-              </p>
+                  <p className="mb-1">
+                    <strong>Name:</strong> {user?.name}
+                  </p>
+                  <p className="mb-1">
+                    <strong>Phone:</strong> {user?.user_id}
+                  </p>
+                  <p className="mb-1">
+                    <strong>Address:</strong> {user?.address}
+                  </p>
 
-              <button
-                className="btn btn-outline-primary btn-sm mt-2"
-                onClick={() => setShowModal(true)}
-              >
-                Change Address
-              </button>
+                  <button
+                    className="btn btn-outline-primary btn-sm mt-2"
+                    onClick={() => setShowModal(true)}
+                  >
+                    Change Address
+                  </button>
+                </>
+              ) : (
+                <>
+                  <h6 className="fw-bold mb-3">Welcome to Turkeeit</h6>
+                  <p className="small text-muted">
+                    Please SignIn to continue your order
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>

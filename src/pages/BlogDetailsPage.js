@@ -1,29 +1,42 @@
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Header from "../components/Header";
-import { HOST } from "../utils/host";
+import { getBlogById } from "../redux/actions/blogActions";
+import { useNavigate } from "react-router-dom";
 
 export default function BlogDetailsPage() {
   const { id } = useParams();
-  const [blog, setBlog] = useState(null);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { blogDetails, loading, error } = useSelector(
+    (state) => state.blogsData
+  );
 
   useEffect(() => {
-    fetch(`${HOST}/api/blogs/` + id)
-      .then((res) => {
-        if (!res.ok) throw new Error("Blog not found");
-        return res.json();
-      })
-      .then((data) => setBlog(data))
-      .catch((err) => console.log(err));
-  }, [id]);
+    dispatch(getBlogById(id));
+  }, [dispatch, id]);
 
-  if (!blog) return <p className="text-center mt-5">Loading...</p>;
+  if (loading) return <p className="text-center mt-5">Loading blog...</p>;
+  if (error) return <p className="text-center text-danger mt-5">{error}</p>;
+  if (!blogDetails?.content) return null;
 
   return (
     <>
       <Header />
       <div className="container py-4">
-        <div dangerouslySetInnerHTML={{ __html: blog.content }} />
+        <button className="btn btn-light mb-3" onClick={() => navigate(-1)}>
+          ← Back
+        </button>
+
+        <h4 className="fw-bold">{blogDetails.title}</h4>
+        <p className="text-muted">{blogDetails.description}</p>
+        <small className="text-primary">{blogDetails.city}</small>
+
+        <hr />
+
+        <div dangerouslySetInnerHTML={{ __html: blogDetails.content }} />
       </div>
     </>
   );

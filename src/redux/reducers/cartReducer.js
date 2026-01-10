@@ -7,13 +7,17 @@ const initialState = {
 export const cartReducer = (state = initialState, action) => {
   switch (action.type) {
     case "CART_ADD_ITEM": {
-      const exists = state.items.find((item) => item.id === action.payload.id);
+      console.log("cart item added reducer");
+      console.log(state.items);
+      const exists = state.items.find(
+        (item) => item.service_id === action.payload.service_id
+      );
 
       if (exists) {
         return {
           ...state,
           items: state.items.map((item) =>
-            item.id === action.payload.id
+            item.service_id === action.payload.service_id
               ? { ...item, qty: item.qty + 1 }
               : item
           ),
@@ -29,7 +33,7 @@ export const cartReducer = (state = initialState, action) => {
     case "CART_REMOVE_ITEM":
       return {
         ...state,
-        items: state.items.filter((item) => item.id !== action.payload),
+        items: state.items.filter((item) => item.service_id !== action.payload),
       };
 
     case "CART_CLEAR":

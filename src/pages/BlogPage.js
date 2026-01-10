@@ -1,25 +1,28 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Header from "../components/Header";
 import { useNavigate } from "react-router-dom";
-import { HOST } from "../utils/host";
+import { getAllBlogs } from "../redux/actions/blogActions";
 
 export default function BlogPage() {
-  const [blogs, setBlogs] = useState([]);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const { blogs, loading, error } = useSelector((state) => state.blogsData);
+
   useEffect(() => {
-    fetch(`${HOST}/api/blogs`)
-      .then((res) => res.json())
-      .then((data) => setBlogs(data))
-      .catch((err) => console.log("Blog fetch error", err));
-  }, []);
+    dispatch(getAllBlogs());
+  }, [dispatch]);
 
   return (
     <>
       <Header />
       <div className="container py-4">
         <h3 className="fw-bold mb-4">Our Blogs</h3>
+
+        {loading && <p>Loading blogs...</p>}
+        {error && <p className="text-danger">{error}</p>}
+
         <div className="row">
           {blogs.map((b) => (
             <div className="col-md-4 mb-3" key={b.id}>

@@ -20,18 +20,18 @@ export default function ServiceDetails() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJtb2JpbGVfbnVtYmVyIjoiOTg2NzMxNTM2MSIsImlhdCI6MTc2NjA1MzAyOSwiZXhwIjoxNzczODI5MDI5fQ.xl29SDnHJVDUzK6MgFV8kSypzCcFn19DH2M0C61gQUg";
+  const token = localStorage.getItem("token");
   const { selectedServiceId, services, serviceDetails, loading } = useSelector(
     (state) => state.services
   );
   const cartItems = useSelector((state) => state.cart.items);
 
   const basePrice = Number(serviceDetails?.price || 0);
-  const additionalsTotal = cartItems.reduce(
-    (total, item) => total + Number(item.price),
-    0
-  );
+
+  const additionalsTotal = cartItems
+    .filter((item) => item.type === "additional")
+    .reduce((sum, item) => sum + Number(item.price), 0);
+
   const totalPrice = basePrice + additionalsTotal;
 
   const serviceId =
@@ -48,11 +48,38 @@ export default function ServiceDetails() {
     }
   }, [dispatch, serviceId, token]);
 
+  useEffect(() => {
+    if (!serviceDetails) return;
+    console.log("service details...", serviceDetails);
+    console.log("Cart Items:", cartItems);
+    const alreadyInCart = cartItems.some(
+      (item) => String(item.service_id) === String(serviceDetails.id)
+    );
+    console.log("hasmainservice", alreadyInCart);
+    if (!alreadyInCart) {
+      dispatch(
+        addToCart({
+          service_id: serviceDetails.id,
+          name: serviceDetails.name,
+          price: Number(serviceDetails.price),
+          image: serviceDetails.image_url,
+          quantity: 1,
+          type: "service",
+        })
+      );
+    }
+  }, [serviceDetails, cartItems, dispatch]);
+
   const groupedServices = useMemo(
     () => groupServicesByCategory(services.services),
     [services]
   );
   if (loading || !serviceDetails) return <p>Loading...</p>;
+
+  const addToCartHandler = (cartItems) => {
+    console.log("Navigating to Order Details with cart items:", cartItems);
+    navigate("/order/details");
+  };
 
   const openServiceDetails = async (id) => {
     try {
@@ -114,9 +141,15 @@ export default function ServiceDetails() {
             {/* Includes */}
             <div className="mb-3">
               <h6 className="fw-semibold">Service Includes</h6>
-              <ul className="small mb-0">
+              <ul className="list-none m-0 small mb-0 ">
                 {serviceDetails?.service_includes?.map((item, index) => (
-                  <li key={index}>{item}</li>
+                  <li
+                    key={index}
+                    className="flex items-center gap-2 text-base py-1"
+                  >
+                    <span className="text-lg">✔</span>
+                    {item}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -124,9 +157,15 @@ export default function ServiceDetails() {
             {/* Excludes */}
             <div className="mb-3">
               <h6 className="fw-semibold">Service Excludes</h6>
-              <ul className="small mb-0">
+              <ul className="list-none m-0 small mb-0 ">
                 {serviceDetails?.service_excludes?.map((item, index) => (
-                  <li key={index}>{item}</li>
+                  <li
+                    key={index}
+                    className="flex items-center gap-2 text-base py-1"
+                  >
+                    <span className="text-lg">❌</span>
+                    {item}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -164,7 +203,7 @@ export default function ServiceDetails() {
                     .filter((item) => item.id !== serviceDetails?.id)
                     .map((item) => {
                       const inCart = cartItems.some(
-                        (cartItem) => cartItem.id === item.id
+                        (cartItem) => cartItem.service_id === item.id
                       );
                       return (
                         <AdditionalItem
@@ -177,10 +216,12 @@ export default function ServiceDetails() {
                           onAdd={() =>
                             dispatch(
                               addToCart({
-                                id: item.id,
+                                service_id: item.id,
                                 name: item.name,
                                 price: Number(item.price),
                                 image: item.image_url,
+                                quantity: 1,
+                                type: "additional",
                               })
                             )
                           }
@@ -197,14 +238,6 @@ export default function ServiceDetails() {
           <div className="col-3">
             <h5 className="fw-bold mb-2">Cart</h5>
             <div className="card shadow-sm rounded-3 p-2">
-              <div className="d-flex justify-content-between small mb-1">
-                <span>Base Price</span>
-                <span>₹{serviceDetails?.price}</span>
-              </div>
-              <div className="d-flex justify-content-between small mb-1">
-                <span>Additionals</span>
-                <span>₹{additionalsTotal}</span>
-              </div>
               {cartItems.map((item) => (
                 <div className="d-flex justify-content-between small mb-1">
                   <span>{item.name}</span>
@@ -218,7 +251,7 @@ export default function ServiceDetails() {
               </div>
               <button
                 className="btn btn-sm btn-primary w-100 mt-2"
-                onClick={() => navigate("/order/details")}
+                onClick={() => addToCartHandler(cartItems)}
               >
                 Book Now
               </button>
