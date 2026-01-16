@@ -76,12 +76,12 @@ export const updateOrderStatus =
           razorpay_id: razorpayOrderId,
           payment_id: paymentId,
           status: status,
-          mode_of_payment: "Online",
         },
         {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
+            "mode-of-payment": "Online",
           },
         }
       );

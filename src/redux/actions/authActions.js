@@ -7,17 +7,11 @@ export const sendOtp = (mobile) => async (dispatch) => {
     dispatch({ type: "SEND_OTP_REQUEST" });
     console.log("Sending OTP to mobile number:", mobile);
     console.log(`${HOST}/api/sendOtp`);
-    await api.post(
-      `${HOST}/api/sendOtp`,
-      {
-        mobile_number: mobile,
+    await api.post(`${HOST}/api/sendOtp`, {
+      headers: {
+        "mobile-number": mobile,
       },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    });
     dispatch({ type: "SEND_OTP_SUCCESS" });
   } catch (error) {
     dispatch({
@@ -32,18 +26,12 @@ export const verifyOtp = (mobile, otp) => {
   console.log(mobile, otp);
   return async (dispatch) => {
     try {
-      const res = await api.post(
-        `${HOST}/api/verifyOtp`,
-        {
-          mobile_number: mobile,
+      const res = await api.post(`${HOST}/api/verifyOtp`, {
+        headers: {
+          "mobile-number": mobile,
           otp: otp,
         },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      });
       localStorage.setItem("token", res.data.token);
       console.log("OTP verified, token received:", res.data.token);
       dispatch({ type: "VERIFY_OTP_SUCCESS", payload: res.data.token });

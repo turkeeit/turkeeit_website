@@ -33,19 +33,13 @@ export const getServiceDetails = (serviceId, token) => {
     dispatch({ type: "GET_SERVICE_DETAILS_REQUEST" });
 
     try {
-      const res = await api.post(
-        `${HOST}/api/getServiceDetails`,
-        {
-          service_id: serviceId,
+      const res = await api.get(`${HOST}/api/getServiceDetails`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "service-id": serviceId,
+          // 👈 HEADER
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-            // 👈 HEADER
-          },
-        }
-      );
+      });
 
       dispatch({
         type: "GET_SERVICE_DETAILS_SUCCESS",
