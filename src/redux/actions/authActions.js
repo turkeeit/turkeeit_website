@@ -7,11 +7,15 @@ export const sendOtp = (mobile) => async (dispatch) => {
     dispatch({ type: "SEND_OTP_REQUEST" });
     console.log("Sending OTP to mobile number:", mobile);
     console.log(`${HOST}/api/sendOtp`);
-    await api.post(`${HOST}/api/sendOtp`, {
-      headers: {
-        "mobile-number": mobile,
+    await api.post(
+      `${HOST}/api/sendOtp`,
+      {},
+      {
+        headers: {
+          mobile_number: mobile,
+        },
       },
-    });
+    );
     dispatch({ type: "SEND_OTP_SUCCESS" });
   } catch (error) {
     dispatch({
@@ -26,12 +30,16 @@ export const verifyOtp = (mobile, otp) => {
   console.log(mobile, otp);
   return async (dispatch) => {
     try {
-      const res = await api.post(`${HOST}/api/verifyOtp`, {
-        headers: {
-          "mobile-number": mobile,
-          otp: otp,
+      const res = await api.post(
+        `${HOST}/api/verifyOtp`,
+        {},
+        {
+          headers: {
+            mobile_number: mobile,
+            otp: otp,
+          },
         },
-      });
+      );
       localStorage.setItem("token", res.data.token);
       console.log("OTP verified, token received:", res.data.token);
       dispatch({ type: "VERIFY_OTP_SUCCESS", payload: res.data.token });
@@ -98,10 +106,11 @@ export const updateUserProfile = (profileData) => async (dispatch) => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
 
     console.log("Update Profile Response Data:", data);
+    dispatch(getUserDetails(token));
     dispatch({
       type: "UPDATE_PROFILE_SUCCESS",
       payload: data.user,

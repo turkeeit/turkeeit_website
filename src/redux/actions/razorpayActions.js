@@ -20,7 +20,7 @@ export const createOrder = (cartItems, address, total) => async (dispatch) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
     dispatch({
       type: "CREATE_ORDER_SUCCESS",
@@ -63,7 +63,7 @@ export const updateOrderStatus =
   (orderId, razorpayOrderId, paymentId, status) => async (dispatch) => {
     try {
       console.log(
-        `orderId = ${orderId}, razorpayOrderId=${razorpayOrderId},  paymentId=${paymentId}, status=${status}`
+        `orderId = ${orderId}, razorpayOrderId=${razorpayOrderId},  paymentId=${paymentId}, status=${status}`,
       );
       dispatch({ type: "SAVE_ORDER_REQUEST" });
 
@@ -81,12 +81,12 @@ export const updateOrderStatus =
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
-            "mode-of-payment": "Online",
+            mode_of_payment: "Online",
           },
-        }
+        },
       );
 
-      console.log("order update respo[nse", response);
+      console.log("order update response", response);
       dispatch({ type: "SAVE_ORDER_SUCCESS" });
     } catch (err) {
       dispatch({ type: "SAVE_ORDER_FAIL", payload: err.message });

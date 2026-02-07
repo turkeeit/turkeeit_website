@@ -36,7 +36,7 @@ export const getServiceDetails = (serviceId, token) => {
       const res = await api.get(`${HOST}/api/getServiceDetails`, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "service-id": serviceId,
+          service_id: serviceId,
           // 👈 HEADER
         },
       });

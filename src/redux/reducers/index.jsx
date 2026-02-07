@@ -4,6 +4,7 @@ import servicesReducer from "./serviceReducer";
 import { cartReducer } from "./cartReducer";
 import { blogReducer } from "./blogReducer";
 import { razorpayReducer } from "./razorpayReducer";
+import { orderReducer } from "./orderReducer";
 
 export default combineReducers({
   auth: authReducer,
@@ -11,4 +12,5 @@ export default combineReducers({
   cart: cartReducer,
   blogsData: blogReducer,
   razorpay: razorpayReducer,
+  orders: orderReducer,
 });

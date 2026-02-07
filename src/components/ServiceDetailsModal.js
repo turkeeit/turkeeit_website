@@ -21,16 +21,24 @@ export default function ServiceDetailsModal({ service, loading }) {
               <>
                 <h6>Service Includes</h6>
                 <ul>
-                  {service.service_includes?.map((i, idx) => (
-                    <li key={idx}>{i}</li>
-                  ))}
+                  {service?.service_includes?.length > 0 ? (
+                    service.service_includes.map((i, idx) => (
+                      <li key={idx}>{i.description}</li>
+                    ))
+                  ) : (
+                    <li>No includes</li>
+                  )}
                 </ul>
 
                 <h6>Service Excludes</h6>
                 <ul>
-                  {service.service_excludes?.map((i, idx) => (
-                    <li key={idx}>{i}</li>
-                  ))}
+                  {service?.service_excludes?.length > 0 ? (
+                    service.service_excludes.map((i, idx) => (
+                      <li key={idx}>{i.description}</li>
+                    ))
+                  ) : (
+                    <li>No excludes</li>
+                  )}
                 </ul>
 
                 <h6>Time Duration</h6>

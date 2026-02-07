@@ -1,131 +1,122 @@
 import Header from "../components/Header";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import {
   getUserDetails,
   updateUserProfile,
 } from "../redux/actions/authActions";
-import { useDispatch } from "react-redux";
 import {
   createOrder,
-  createRazorpayOrder,
-  saveOrderToDB,
   updateOrderStatus,
 } from "../redux/actions/razorpayActions";
+import {
+  BRAND_NAME,
+  CURRENCY,
+  DESCRIPTION,
+  RAZORPAY_KEY,
+  RAZORPAY_PAID_STATUS,
+} from "../utils/host";
 
 export default function OrderDetails() {
   const dispatch = useDispatch();
 
   const cartItems = useSelector((state) => state.cart.items);
   const { user } = useSelector((state) => state.auth);
-  const baseService = useSelector((state) => state.services.serviceDetails);
-  const orderRes = useSelector((state) => state.razorpay);
-  const [editName, setEditName] = useState("");
-  const [editGender, setEditGender] = useState("");
 
   const [showModal, setShowModal] = useState(false);
 
-  const [newAddress, setNewAddress] = useState(user?.address);
+  // Editable states
+  const [editName, setEditName] = useState("");
+  const [editGender, setEditGender] = useState("");
+  const [editUserId, setEditUserId] = useState("");
+  const [newAddress, setNewAddress] = useState("");
 
-  const basePrice = Number(baseService?.price || 0);
+  // Load user
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) dispatch(getUserDetails(token));
+  }, [dispatch]);
+
+  // Autofill when user loads
+  useEffect(() => {
+    if (user) {
+      setEditName(user.name || "");
+      setEditGender(user.gender || "");
+      setEditUserId(user.user_id || "");
+      setNewAddress(user.address || "");
+    }
+  }, [user]);
+
+  // Total
   const additionalsTotal = cartItems
     .filter((item) => item.type === "additional")
     .reduce((sum, item) => sum + Number(item.price), 0);
 
-  const total = basePrice + additionalsTotal;
+  const total = additionalsTotal;
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      dispatch(getUserDetails(token));
-    }
-  }, []);
-
-  /* 🔐 Fetch user when profile page opens */
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token && !user) {
-      dispatch(getUserDetails(token));
-    }
-  }, [dispatch, user]);
-
+  // Save profile
   const handleAddressSave = () => {
-    if (!newAddress.trim()) {
-      alert("Address cannot be empty");
-      return;
-    }
-    if (!user?.name || !user?.gender) {
-      alert("User profile not loaded yet");
+    if (!editName || !editGender || !newAddress) {
+      alert("All fields required");
       return;
     }
 
     dispatch(
       updateUserProfile({
-        name: user?.name,
-        gender: user?.gender,
-        address: newAddress, // ✅ ONLY ADDRESS
-      })
+        name: editName,
+        gender: editGender,
+        user_id: editUserId,
+        address: newAddress,
+      }),
     );
+
     setShowModal(false);
   };
 
-  const handlePayment = async (cartItems, address, total) => {
-    console.log(
-      "Initiating payment with cart items:",
-      cartItems,
-      address,
-      total
-    );
-    if (user) {
-      const createOrderRes = await dispatch(
-        createOrder(cartItems, address, total)
-      );
-      console.log("create order  orderRes");
-      console.log(createOrderRes);
-      if (!createOrderRes) return;
+  // Payment
+  const handlePayment = async () => {
+    if (!user || cartItems.length === 0) {
+      alert("Please sign in & add items");
+      return;
+    }
 
-      const options = {
-        key: "rzp_test_ZUC1pptTxiGooR",
-        amount: total * 100,
-        currency: "INR",
-        name: "Turkeeit Services",
-        description: `${createOrderRes.order_id} : order payment`,
-        order_id: createOrderRes.razorpay_order_id,
-        handler: function (res) {
-          console.log("Razorpay Payment Response:", createOrderRes);
-          console.log("----- handler payment --");
-          console.log(
+    const createOrderRes = await dispatch(
+      createOrder(cartItems, user.address, total),
+    );
+
+    if (!createOrderRes) return;
+
+    const options = {
+      key: RAZORPAY_KEY,
+      amount: total * 100,
+      currency: CURRENCY,
+      name: BRAND_NAME,
+      description: DESCRIPTION,
+      order_id: createOrderRes.razorpay_order_id,
+
+      handler: function (res) {
+        dispatch(
+          updateOrderStatus(
             createOrderRes.order_id,
             createOrderRes.razorpay_order_id,
             res.razorpay_payment_id,
-            "PAID"
-          );
+            RAZORPAY_PAID_STATUS,
+          ),
+        );
 
-          dispatch(
-            updateOrderStatus(
-              createOrderRes.order_id,
-              createOrderRes.razorpay_order_id,
-              res.razorpay_payment_id,
-              "PAID"
-            )
-          );
+        alert("Payment successful 🎉");
+        window.location.href = "/";
+      },
 
-          alert("Payment successful! Your order is booked 🎉");
-          window.location.href = "/";
-        },
-        prefill: {
-          name: user?.name,
-          contact: user?.user_id,
-          address: user?.address,
-        },
-      };
+      prefill: {
+        name: user.name,
+        contact: user.user_id,
+      },
+    };
 
-      const rzp = new window.Razorpay(options);
-      rzp.open();
-    } else {
-      alert("Please SignIn to continue your order");
-    }
+    const rzp = new window.Razorpay(options);
+    rzp.open();
   };
 
   return (
@@ -137,18 +128,14 @@ export default function OrderDetails() {
 
         <div className="row">
           {/* CART */}
-          <div className="col-12 col-md-6 mb-3">
-            <div className="card shadow-sm rounded-3 p-3">
-              <h6 className="fw-bold mb-3">Cart</h6>
+          <div className="col-md-6 mb-3">
+            <div className="card p-3 shadow-sm">
+              <h6>Cart</h6>
 
-              {/* Additionals */}
               {cartItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="d-flex justify-content-between mb-2 small"
-                >
-                  <div>{item.name}</div>
-                  <div>₹{item.price}</div>
+                <div key={item.id} className="d-flex justify-content-between">
+                  <span>{item.name}</span>
+                  <span>₹{item.price}</span>
                 </div>
               ))}
 
@@ -161,7 +148,7 @@ export default function OrderDetails() {
 
               <button
                 className="btn btn-primary w-100 mt-3"
-                onClick={() => handlePayment(cartItems, user?.address, total)}
+                onClick={handlePayment}
               >
                 Checkout
               </button>
@@ -169,62 +156,85 @@ export default function OrderDetails() {
           </div>
 
           {/* USER DETAILS */}
-          <div className="col-12 col-md-6 mb-3">
-            <div className="card shadow-sm rounded-3 p-3">
+          <div className="col-md-6 mb-3">
+            <div className="card p-3 shadow-sm">
               {user ? (
                 <>
-                  <h6 className="fw-bold mb-3">User Details</h6>
+                  <h6>User Details</h6>
 
-                  <p className="mb-1">
-                    <strong>Name:</strong> {user?.name}
+                  <p>
+                    <b>Name:</b> {user.name}
                   </p>
-                  <p className="mb-1">
-                    <strong>Phone:</strong> {user?.user_id}
+                  <p>
+                    <b>Phone:</b> {user.user_id}
                   </p>
-                  <p className="mb-1">
-                    <strong>Address:</strong> {user?.address}
+                  <p>
+                    <b>Gender:</b> {user.gender}
+                  </p>
+                  <p>
+                    <b>Address:</b> {user.address}
                   </p>
 
                   <button
-                    className="btn btn-outline-primary btn-sm mt-2"
+                    className="btn btn-outline-primary btn-sm"
                     onClick={() => setShowModal(true)}
                   >
-                    Change Address
+                    Edit Details
                   </button>
                 </>
               ) : (
-                <>
-                  <h6 className="fw-bold mb-3">Welcome to Turkeeit</h6>
-                  <p className="small text-muted">
-                    Please SignIn to continue your order
-                  </p>
-                </>
+                <p>Please sign in</p>
               )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* ADDRESS MODAL */}
+      {/* MODAL */}
       {showModal && (
         <div
           className="modal fade show"
-          style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
+          style={{ display: "block", background: "rgba(0,0,0,0.5)" }}
         >
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Edit Address</h5>
+                <h5>Edit Details</h5>
                 <button
                   className="btn-close"
                   onClick={() => setShowModal(false)}
-                ></button>
+                />
               </div>
 
               <div className="modal-body">
+                <input
+                  className="form-control mb-2"
+                  placeholder="Name"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                />
+
+                <select
+                  className="form-control mb-2"
+                  value={editGender}
+                  onChange={(e) => setEditGender(e.target.value)}
+                >
+                  <option value="">Select Gender</option>
+                  <option>Male</option>
+                  <option>Female</option>
+                  <option>Other</option>
+                </select>
+
+                <input
+                  className="form-control mb-2"
+                  value={editUserId}
+                  disabled
+                />
+
                 <textarea
                   className="form-control"
                   rows="3"
+                  placeholder="Address"
                   value={newAddress}
                   onChange={(e) => setNewAddress(e.target.value)}
                 />
@@ -237,8 +247,9 @@ export default function OrderDetails() {
                 >
                   Cancel
                 </button>
+
                 <button className="btn btn-primary" onClick={handleAddressSave}>
-                  Save Address
+                  Save
                 </button>
               </div>
             </div>

@@ -23,7 +23,7 @@ export default function Header() {
   const [userName, setUserName] = useState(null);
 
   const { otpSent, otpVerified, token, loading, user, error } = useSelector(
-    (state) => state.auth
+    (state) => state.auth,
   );
 
   // closemenu
@@ -142,6 +142,9 @@ export default function Header() {
                     <div
                       className="dropdown-item py-2 px-3"
                       style={{ cursor: "pointer" }}
+                      onClick={() => {
+                        window.location.href = "/user/orders";
+                      }}
                     >
                       My Orders
                     </div>
