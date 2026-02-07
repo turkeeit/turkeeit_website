@@ -81,12 +81,12 @@ export const updateOrderStatus =
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
-            mode_of_payment: "Online",
+            modeofpayment: "Online",
           },
         },
       );
 
-      console.log("order update response", response);
+      console.log("order update respo[nse", response);
       dispatch({ type: "SAVE_ORDER_SUCCESS" });
     } catch (err) {
       dispatch({ type: "SAVE_ORDER_FAIL", payload: err.message });
