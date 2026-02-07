@@ -12,7 +12,7 @@ export const sendOtp = (mobile) => async (dispatch) => {
       {},
       {
         headers: {
-          mobile_number: mobile,
+          mobilenumber: mobile,
         },
       },
     );
@@ -35,7 +35,7 @@ export const verifyOtp = (mobile, otp) => {
         {},
         {
           headers: {
-            mobile_number: mobile,
+            mobilenumber: mobile,
             otp: otp,
           },
         },
