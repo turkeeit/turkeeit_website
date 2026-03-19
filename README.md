@@ -3,7 +3,7 @@
 Folder Purpose
 components/ Reusable UI pieces
 pages/ Whole-page layouts
-api/ Handle all backend calls
+api/ Handle all backend calls..
 context/ Global app state
 hooks/ Reuse logic (ex: fetch, auth)
 utils/ Helper functions
