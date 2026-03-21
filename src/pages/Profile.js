@@ -46,7 +46,7 @@ export default function Profile() {
         name: editName,
         gender: editGender,
         address: editAddress,
-      })
+      }),
     );
     setShowEditModal(false);
   };
@@ -56,28 +56,69 @@ export default function Profile() {
       <Header />
 
       <div className="container mt-4">
-        <h4>My Profile</h4>
+        <div className="row">
+          <div className="col-md-3">
+            <div className="card shadow-sm" style={{ borderRadius: "12px" }}>
+              {/* Header */}
+              <div
+                className="p-3 text-center"
+                style={{ background: "#FFC500" }}
+              >
+                <h5 className="m-0">My Profile</h5>
+              </div>
 
-        <div className="card p-4 mt-3">
-          <p>
-            <b>Name:</b> {user?.name || "User"}
-          </p>
-          <p>
-            <b>Gender:</b> {user?.gender || "-"}
-          </p>
-          <p>
-            <b>Mobile:</b> {user?.user_id || "-"}
-          </p>
-          <p>
-            <b>Address:</b> {user?.address || "Not added"}
-          </p>
+              {/* Body */}
+              <div className="p-3 text-center">
+                <i
+                  className="bi bi-person-circle mb-3"
+                  style={{ fontSize: "70px", color: "#6c757d" }}
+                />
 
-          <button
-            className="btn btn-outline-primary mt-2"
-            onClick={() => setShowEditModal(true)}
-          >
-            Edit Profile
-          </button>
+                <div className="text-start ps-3 ml-2">
+                  <p>
+                    <b style={{ color: "#444" }}>Name:</b>{" "}
+                    <span className="text-muted">{user?.name || "User"}</span>
+                  </p>
+                  <p>
+                    <b style={{ color: "#444" }}>Gender:</b>{" "}
+                    <span className="text-muted">{user?.gender || "-"}</span>
+                  </p>
+                  <p>
+                    <b style={{ color: "#444" }}>Mobile:</b>{" "}
+                    <span className="text-muted">{user?.user_id || "-"}</span>
+                  </p>
+                  <p>
+                    <b style={{ color: "#444" }}>Address:</b>{" "}
+                    <span className="text-muted">
+                      {user?.address || "Not added"}
+                    </span>
+                  </p>
+                </div>
+
+                <button
+                  className="btn w-100"
+                  style={{
+                    backgroundColor: "#FFC500",
+                    color: "#212529",
+                    fontWeight: "bold",
+                  }}
+                  onClick={() => setShowEditModal(true)}
+                >
+                  Edit Profile
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-9">
+            <div className="card shadow-sm" style={{ borderRadius: "12px" }}>
+              <div
+                className="p-3 text-center"
+                style={{ background: "#FFC500" }}
+              >
+                <h5 className="m-0">Personal Details</h5>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

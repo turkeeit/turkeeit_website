@@ -16,9 +16,10 @@ export default function Dashboard() {
   useEffect(() => {
     dispatch(getAllServices(token));
   }, [dispatch, token]);
+
   const groupedServices = useMemo(
     () => groupServicesByCategory(services.services),
-    [services]
+    [services],
   );
   if (loading) return <p>Loading...</p>;
   if (error) return <p className="text-danger">{error}</p>;
@@ -26,13 +27,23 @@ export default function Dashboard() {
   return (
     <div>
       <Header />
-      {Object.values(groupedServices).map((category) => (
+
+      {/* ✅ DIRECT RENDER (NO GROUPING NEEDED) */}
+      {services?.map((item, index) => (
+        <ProductSlider
+          key={index}
+          title={item.subcategory_name} // ✅ SUBCATEGORY
+          services={item.services} // ✅ SERVICES
+        />
+      ))}
+
+      {/* {Object.values(groupedServices).map((category) => (
         <ProductSlider
           key={category.categoryId}
           title={CATEGORY_MAP[category.categoryId]}
           services={category.services}
         />
-      ))}
+      ))} */}
       <Footer />
     </div>
   );

@@ -9,7 +9,7 @@
 .logo {
   font-size: 22px;
   font-weight: bold;
-  color: #FFC E1B;
+  color: #ffc E1B;
 }
 
 .nav {
@@ -29,4 +29,66 @@
   color: white;
   text-decoration: none;
   border-radius: 5px;
+}
+
+/* Search button hover effect */
+.btn-search {
+  background-color: #6c757d;
+  color: #ede7e7;
+  border: none;
+  transition: all 0.3s;
+}
+.btn-search:hover {
+  background-color: #5a6268; /* Slightly darker on hover */
+  color: #ffffff; /* text turns white on hover */
+  cursor: pointer;
+}
+
+/* Sign In button hover effect */
+.btn-signin {
+  background-color: #ffffff;
+  border: 1.5px solid #535151;
+  color: #201f1f;
+  transition: all 0.3s;
+}
+.btn-signin:hover {
+  background-color: #6c757d; /* Dark background on hover */
+  color: #fbfaf8; /* Text changes to yellow (magnetic) */
+  cursor: pointer;
+}
+
+/* Get OTP button */
+.btn-otp {
+  background-color: #ffc500; /* Yellow background */
+  color: black; /* Magnetic black text */
+  border: none;
+  font-weight: bold;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease; /* Smooth transition */
+}
+
+.btn-otp:hover {
+  background-color: #e6b800; /* Slightly darker yellow on hover */
+  color: black;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Subtle shadow for lift effect */
+  cursor: pointer;
+}
+
+/* Verify OTP button */
+.btn-verify {
+  background-color: #ffc500; /* Yellow background */
+  color: black; /* Magnetic black text */
+  border: none;
+  font-weight: bold;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease; /* Smooth transition */
+}
+
+.btn-verify:hover {
+  background-color: #e6b800; /* Slightly darker yellow on hover */
+  color: black;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Subtle shadow for lift effect */
+  cursor: pointer;
 }

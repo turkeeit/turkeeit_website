@@ -11,6 +11,7 @@ import {
   sendOtp,
   verifyOtp,
 } from "../redux/actions/authActions";
+import "./Header.css";
 
 export default function Header() {
   const dispatch = useDispatch();
@@ -98,7 +99,10 @@ export default function Header() {
   return (
     <>
       {/* ================= TOP NAVBAR ================= */}
-      <nav className="navbar bg-white shadow-sm px-3">
+      <nav
+        className="navbar shadow-sm px-3"
+        style={{ backgroundColor: "#FFC500" }}
+      >
         <div className="container-fluid">
           <div className="col-2 d-flex align-items-center">
             <img src={logo} alt="Turkeeit" style={{ height: "45px" }} />
@@ -107,7 +111,7 @@ export default function Header() {
 
           <div className="col-7 d-flex justify-content-center">
             <input className="form-control" placeholder="Search services..." />
-            <button className="btn btn-primary ms-2">Search</button>
+            <button className="btn btn-search ms-2">Search</button>
           </div>
 
           <div className="col-3 d-flex justify-content-end">
@@ -162,7 +166,10 @@ export default function Header() {
                 )}
               </div>
             ) : (
-              <button className="btn" onClick={() => setShowModal(true)}>
+              <button
+                className="btn btn-signin"
+                onClick={() => setShowModal(true)}
+              >
                 Sign In
               </button>
             )}
@@ -172,11 +179,11 @@ export default function Header() {
 
       {/* ================= CATEGORY NAVBAR ================= */}
       <nav className="navbar navbar-expand-lg bg-white border-top border-bottom">
-        <div className="container-fluid">
-          <ul className="navbar-nav me-auto">
+        <div className="container-fluid d-flex justify-content-between align-items-center">
+          <ul className="navbar-nav mx-auto d-flex flex-row gap-2">
             <li className="nav-item">
               <button
-                className="nav-link btn px-4"
+                className="nav-link btn px-4 fw-bold category-btn"
                 onClick={() => goToCategory("Cleaning Services")}
               >
                 {" "}
@@ -185,7 +192,7 @@ export default function Header() {
             </li>
             <li className="nav-item">
               <button
-                className="nav-link btn px-4"
+                className="nav-link btn px-4 fw-bold"
                 onClick={() => goToCategory("Electrical Services")}
               >
                 {" "}
@@ -194,7 +201,7 @@ export default function Header() {
             </li>
             <li className="nav-item">
               <button
-                className="nav-link btn px-4"
+                className="nav-link btn px-4 fw-bold"
                 onClick={() => goToCategory("Plumbing Services")}
               >
                 {" "}
@@ -203,7 +210,7 @@ export default function Header() {
             </li>
             <li className="nav-item">
               <button
-                className="nav-link btn px-4"
+                className="nav-link btn px-4 fw-bold"
                 onClick={() => goToCategory("Carpenter Services")}
               >
                 {" "}
@@ -212,7 +219,7 @@ export default function Header() {
             </li>
             <li className="nav-item">
               <button
-                className="nav-link btn px-4"
+                className="nav-link btn px-4 fw-bold"
                 onClick={() => goToCategory("Painting Services")}
               >
                 {" "}
@@ -221,7 +228,7 @@ export default function Header() {
             </li>
             <li className="nav-item">
               <button
-                className="nav-link btn px-4"
+                className="nav-link btn px-4 fw-bold"
                 onClick={() => goToCategory("AC Services")}
               >
                 {" "}
@@ -230,7 +237,7 @@ export default function Header() {
             </li>
             <li className="nav-item">
               <button
-                className="nav-link btn px-4"
+                className="nav-link btn px-4 fw-bold"
                 onClick={() => navigate("/blogs")}
               >
                 {" "}
@@ -290,11 +297,11 @@ export default function Header() {
                       onChange={(e) => setMobile(e.target.value)}
                     />
                     <button
-                      className="btn btn-primary w-100"
+                      className="btn btn-otp w-100"
                       onClick={getOtpHandler}
                       disabled={loading}
                     >
-                      {loading ? "Sending..." : "Get OTP"}
+                      {loading ? "Sending..." : "Send OTP"}
                     </button>
                   </>
                 )}
@@ -308,7 +315,7 @@ export default function Header() {
                       onChange={(e) => setOtp(e.target.value)}
                     />
                     <button
-                      className="btn btn-success w-100"
+                      className="btn btn-verify w-100"
                       onClick={verifyOtpHandler}
                       disabled={loading}
                     >
