@@ -114,57 +114,75 @@ export default function Header() {
             <button className="btn btn-search ms-2">Search</button>
           </div>
 
-          <div className="col-3 d-flex justify-content-end">
+          <div className="col-3 d-flex justify-content-end align-items-center gap-3">
+            {/* Phone */}
+
+            {/* If user logged in */}
             {userName ? (
-              <div className="position-relative">
+              <>
+                {/* Cart Icon */}
                 <div
-                  className="rounded-circle bg-secondary text-white d-flex justify-content-center align-items-center fw-semibold"
-                  style={{ height: "36px", width: "36px", cursor: "pointer" }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowProfileMenu(!showProfileMenu);
-                  }}
+                  className="position-relative"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => navigate("/cart")}
                 >
-                  {userName?.charAt(0).toUpperCase()}
+                  <i className="bi bi-cart fs-5"></i>
+
+                  {/* Cart Count Badge */}
+                  {3 > 0 && (
+                    <span
+                      className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                      style={{ fontSize: "10px" }}
+                    >
+                      {3}
+                    </span>
+                  )}
                 </div>
 
-                {showProfileMenu && (
+                {/* Profile Icon */}
+                <div className="position-relative">
                   <div
-                    className="position-absolute end-0 mt-2 bg-white border rounded shadow"
-                    style={{ width: "160px", zIndex: 999 }}
+                    className="rounded-circle bg-black text-white d-flex justify-content-center align-items-center fw-semibold"
+                    style={{ height: "36px", width: "36px", cursor: "pointer" }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowProfileMenu(!showProfileMenu);
+                    }}
                   >
-                    <div
-                      className="dropdown-item py-2 px-3"
-                      style={{ cursor: "pointer" }}
-                      onClick={() => {
-                        window.location.href = "/user/profile";
-                      }}
-                    >
-                      Profile
-                    </div>
-
-                    <div
-                      className="dropdown-item py-2 px-3"
-                      style={{ cursor: "pointer" }}
-                      onClick={() => {
-                        window.location.href = "/user/orders";
-                      }}
-                    >
-                      My Orders
-                    </div>
-
-                    <hr className="my-1" />
-
-                    <div
-                      className="dropdown-item py-2 px-3 text-danger"
-                      style={{ cursor: "pointer" }}
-                      onClick={handleLogout}
-                    >
-                      Logout
-                    </div>
+                    <i className="bi bi-person-fill"></i>
                   </div>
-                )}
-              </div>
+
+                  {showProfileMenu && (
+                    <div
+                      className="position-absolute end-0 mt-2 bg-white border rounded shadow"
+                      style={{ width: "160px", zIndex: 999 }}
+                    >
+                      <div
+                        className="dropdown-item py-2 px-3"
+                        onClick={() => navigate("/user/profile")}
+                      >
+                        Profile
+                      </div>
+
+                      <div
+                        className="dropdown-item py-2 px-3"
+                        onClick={() => navigate("/user/orders")}
+                      >
+                        My Orders
+                      </div>
+
+                      <hr className="my-1" />
+
+                      <div
+                        className="dropdown-item py-2 px-3 text-danger"
+                        onClick={handleLogout}
+                      >
+                        Logout
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </>
             ) : (
               <button
                 className="btn btn-signin"

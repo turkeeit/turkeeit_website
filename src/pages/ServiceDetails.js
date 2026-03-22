@@ -21,30 +21,24 @@ export default function ServiceDetails() {
   const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
+
   const { selectedServiceId, services, serviceDetails, loading } = useSelector(
     (state) => state.services,
   );
 
   const cartItems = useSelector((state) => state.cart.items);
 
-  const basePrice = Number(serviceDetails?.price || 0);
+  const [modalService, setModalService] = useState(null);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [inCart, setInCart] = useState(false);
 
-  const additionalsTotal = cartItems
-    .filter((item) => item.type === "additional")
-    .reduce((sum, item) => sum + Number(item.price), 0);
-
-  const totalPrice = additionalsTotal;
+  // 🔥 LOGIN POPUP STATE
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
 
   const serviceId =
     selectedServiceId || localStorage.getItem("selectedServiceId");
 
-  const [modalService, setModalService] = useState(null);
-  const [modalLoading, setModalLoading] = useState(false);
-  const [orderConfimred, setOrderConfirmed] = useState(false);
-  const [inCart, setInCart] = useState(false);
-
   useEffect(() => {
-    console.log("Fetching service details for serviceId:", serviceId);
     if (serviceId) {
       dispatch(getServiceDetails(serviceId, token));
       dispatch(getAllServices(token));
@@ -53,33 +47,32 @@ export default function ServiceDetails() {
 
   useEffect(() => {
     if (!serviceDetails) return;
-    console.log("service details...", serviceDetails);
-    console.log("Cart Items:", cartItems);
+
     const alreadyInCart = cartItems.some(
       (item) => String(item.service_id) === String(serviceDetails.id),
     );
-    if (alreadyInCart) {
-      setInCart(true);
-    } else {
-      setInCart(false);
-    }
-    console.log("hasmainservice", alreadyInCart);
-  }, [serviceDetails, cartItems, orderConfimred, dispatch]);
+
+    setInCart(alreadyInCart);
+  }, [serviceDetails, cartItems]);
 
   const groupedServices = useMemo(
     () => groupServicesByCategory(services.services),
     [services],
   );
+
   if (loading || !serviceDetails) return <p>Loading...</p>;
 
-  const addToCartHandler = (cartItems) => {
-    setOrderConfirmed(true);
-    console.log("Navigating to Order Details with cart items:", cartItems);
-    navigate("/order/details");
+  // 🔥 SAFE ADD TO CART FUNCTION
+  const handleAddToCart = (item) => {
+    if (!token) {
+      setShowLoginPopup(true);
+      return;
+    }
+
+    dispatch(addToCart(item));
   };
 
   const openServiceDetails = async (id) => {
-    console.log("Opening details for service ID:", id);
     try {
       setModalLoading(true);
 
@@ -90,7 +83,7 @@ export default function ServiceDetails() {
           "Content-Type": "application/json",
         },
       });
-      console.log("Modal service details fetched:", res.data);
+
       setModalService(res.data);
       setModalLoading(false);
 
@@ -101,7 +94,7 @@ export default function ServiceDetails() {
       modal.show();
     } catch (err) {
       setModalLoading(false);
-      console.error("Modal service fetch failed", err);
+      console.error(err);
     }
   };
 
@@ -109,182 +102,202 @@ export default function ServiceDetails() {
     <>
       <Header />
       <ServiceDetailsModal service={modalService} loading={modalLoading} />
-      <div className="p-3">
-        <div className="d-flex flex-row justify-content-start align-items-center gap-3 mb-3">
-          <h5 className="">{serviceDetails?.name}</h5>
-          {/* Add Button */}
-          {!inCart ? (
-            <button
-              className="btn btn-primary btn-sm  mt-2"
-              style={{ fontSize: "10px" }}
-              onClick={(e) =>
-                dispatch(
-                  addToCart({
-                    service_id: serviceDetails?.id,
-                    name: serviceDetails?.name,
-                    price: Number(serviceDetails?.price),
-                    image: serviceDetails?.image_url,
-                    quantity: 1,
-                    type: "additional",
-                  }),
-                )
-              }
-            >
-              Add To Cart
-            </button>
-          ) : (
-            <button
-              className="btn btn-danger btn-sm mt-2"
-              style={{ fontSize: "10px" }}
-              onClick={(e) => dispatch(removeFromCart(serviceDetails?.id))}
-            >
-              Remove
-            </button>
-          )}
-        </div>
 
-        {/* Rating + Price */}
-        <div className="d-flex justify-content-start align-items-center mb-3">
-          <span className="small text-muted">
-            <i className="bi bi-star-fill text-warning"></i> 4.8 Ratings
-          </span>
-          <div>
-            <span className="btn btn-primary btn-sm ms-2">
-              <i className="bi bi-currency-rupee"></i> {serviceDetails?.price}
-            </span>
-            <span className="text-decoration-line-through text-muted ms-2">
-              <i className="bi bi-currency-rupee"></i> {serviceDetails?.price}
-            </span>
-          </div>
-        </div>
+      <div style={{ margin: "0 auto", padding: "20px" }}>
+        <div
+          style={{ padding: "12px", borderRadius: "6px", background: "#fff" }}
+        >
+          <div className="row">
+            {/* LEFT */}
+            <div className="col-md-4">
+              <img
+                src={`${HOST}${serviceDetails?.image_url}`}
+                style={{
+                  width: "100%",
+                  height: "140px",
+                  objectFit: "cover",
+                  borderRadius: "6px",
+                }}
+              />
 
-        <div className="row">
-          {/* Included Services */}
-          {/* Service Details */}
-          <div className="col-4">
-            {/* Includes */}
-            <div className="mb-3">
-              <h6 className="fw-semibold">Service Includes</h6>
-              <ul className="list-none m-0 small mb-0 ">
-                {serviceDetails?.service_includes?.map((item, index) => (
-                  <li
-                    key={index}
-                    className="flex items-center gap-2 text-base py-1"
-                  >
-                    <span className="text-lg">✔</span>
-                    {item}
-                  </li>
+              <div className="d-flex gap-2 mt-2 flex-wrap">
+                {[1, 2, 3, 4].map((_, i) => (
+                  <img
+                    key={i}
+                    src={`${HOST}${serviceDetails?.image_url}`}
+                    style={{
+                      width: "48%",
+                      height: "60px",
+                      objectFit: "cover",
+                      borderRadius: "4px",
+                    }}
+                  />
                 ))}
-              </ul>
-            </div>
+              </div>
 
-            {/* Excludes */}
-            <div className="mb-3">
-              <h6 className="fw-semibold">Service Excludes</h6>
-              <ul className="list-none m-0 small mb-0 ">
-                {serviceDetails?.service_excludes?.map((item, index) => (
-                  <li
-                    key={index}
-                    className="flex items-center gap-2 text-base py-1"
-                  >
-                    <span className="text-lg">❌</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
+              <div className="mt-3">
+                <h6 className="fw-bold">Service Includes</h6>
+                <ul className="small m-0">
+                  {serviceDetails?.service_includes?.map((item, i) => (
+                    <li key={i}>✔ {item}</li>
+                  ))}
+                </ul>
+              </div>
 
-            {/* Time Duration */}
-            <div className="mb-3">
-              <h6 className="fw-semibold">Time Duration</h6>
-              <div className="small">
-                {serviceDetails?.duration_min} – {serviceDetails?.duration_max}{" "}
-                minutes
+              <div className="mt-2">
+                <h6 className="fw-bold">Service Excludes</h6>
+                <ul className="small m-0">
+                  {serviceDetails?.service_excludes?.map((item, i) => (
+                    <li key={i}>❌ {item}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="mt-2 small">
+                <strong>Time Duration:</strong> {serviceDetails?.duration_min} –{" "}
+                {serviceDetails?.duration_max} minutes
               </div>
             </div>
 
-            {/* Notes */}
-            {serviceDetails?.notes && (
-              <div>
-                <h6 className="fw-semibold">Notes</h6>
-                <div className="small">{serviceDetails.notes}</div>
+            {/* CENTER */}
+            <div className="col-md-4">
+              <h5 className="fw-bold">{serviceDetails?.name}</h5>
+
+              <div className="small text-muted mb-4 mt-4">⭐ 4.8 Ratings</div>
+
+              <div className="mb-4 mt-4">
+                <span className="btn btn-warning btn-sm fw-bold">
+                  ₹ {serviceDetails?.price}
+                </span>
+                <span className="text-muted text-decoration-line-through ms-2">
+                  ₹ {serviceDetails?.price + 600}
+                </span>
               </div>
-            )}
-          </div>
 
-          {/* Additional Items */}
-          <div className="col-5">
-            <h5 className="fw-bold mb-2">Additionals</h5>
+              <div className="d-flex gap-4" style={{ marginTop: "50px" }}>
+                <button className="btn btn-outline-secondary btn-sm">
+                  Buy Now
+                </button>
 
-            <div className="row g-2">
-              {serviceDetails?.service_addon?.length > 0 ? (
-                serviceDetails.service_addon.map((item) => {
+                {!inCart ? (
+                  <button
+                    className="btn btn-warning btn-sm"
+                    onClick={() =>
+                      handleAddToCart({
+                        service_id: serviceDetails?.id,
+                        name: serviceDetails?.name,
+                        price: Number(serviceDetails?.price),
+                        image: serviceDetails?.image_url,
+                        quantity: 1,
+                        type: "additional",
+                      })
+                    }
+                  >
+                    Add to Cart
+                  </button>
+                ) : (
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => dispatch(removeFromCart(serviceDetails?.id))}
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* RIGHT */}
+            <div className="col-md-4">
+              <div
+                style={{
+                  background: "#f5d36b",
+                  padding: "6px",
+                  textAlign: "center",
+                  borderRadius: "4px",
+                }}
+              >
+                Additional
+              </div>
+
+              <div className="row g-2 mt-2">
+                {serviceDetails?.service_addon?.map((item) => {
                   const inCart = cartItems.some(
                     (cartItem) => cartItem.service_id === Number(item.id),
                   );
 
                   return (
-                    <AdditionalItem
-                      key={item.id}
-                      image={`${HOST}${item.image_url}`}
-                      name={item.name}
-                      price={item.price}
-                      cutPrice={Math.round(item.price * 1.2)}
-                      inCart={inCart}
-                      onAdd={() =>
-                        dispatch(
-                          addToCart({
+                    <div className="col-12" key={item.id}>
+                      <AdditionalItem
+                        image={`${HOST}${item.image_url}`}
+                        name={item.name}
+                        price={item.price}
+                        cutPrice={Math.round(item.price * 1.2)}
+                        inCart={inCart}
+                        onAdd={() =>
+                          handleAddToCart({
                             service_id: Number(item.id),
                             name: item.name,
                             price: Number(item.price),
                             image: item.image_url,
                             quantity: 1,
                             type: "additional",
-                          }),
-                        )
-                      }
-                      onRemove={() => dispatch(removeFromCart(Number(item.id)))}
-                      openServiceDetails={() => openServiceDetails(item.id)}
-                    />
+                          })
+                        }
+                        onRemove={() =>
+                          dispatch(removeFromCart(Number(item.id)))
+                        }
+                        openServiceDetails={() => openServiceDetails(item.id)}
+                      />
+                    </div>
                   );
-                })
-              ) : (
-                <p>No additional services</p>
-              )}
+                })}
+              </div>
             </div>
-          </div>
-
-          {/* Cart */}
-          <div className="col-3">
-            <h5 className="fw-bold mb-2">Cart</h5>
-            {!cartItems.length > 0 ? (
-              <div className="card shadow-sm rounded-3 p-2">
-                <p className="small">Please add items to cart</p>
-              </div>
-            ) : (
-              <div className="card shadow-sm rounded-3 p-2">
-                {cartItems.map((item) => (
-                  <div className="d-flex justify-content-between small mb-1">
-                    <span>{item.name}</span>
-                    <span>₹{item.price}</span>
-                  </div>
-                ))}
-                <hr className="my-1" />
-                <div className="d-flex justify-content-between fw-bold small">
-                  <span>Total</span>
-                  <span>₹{totalPrice}</span>
-                </div>
-                <button
-                  className="btn btn-sm btn-primary w-100 mt-2"
-                  onClick={() => addToCartHandler(cartItems)}
-                >
-                  Book Now
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </div>
+
+      {/* 🔥 LOGIN POPUP */}
+      {showLoginPopup && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(0,0,0,0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 999,
+          }}
+        >
+          <div
+            style={{
+              background: "#fff",
+              padding: "20px",
+              borderRadius: "8px",
+              textAlign: "center",
+              width: "300px",
+            }}
+          >
+            <h6>Please Login</h6>
+            <p style={{ fontSize: "13px" }}>
+              Please login first to add items to cart
+            </p>
+
+            <div className="d-flex justify-content-center gap-2 mt-3">
+              <button
+                className="btn btn-sm btn-secondary"
+                onClick={() => setShowLoginPopup(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

@@ -3,71 +3,67 @@ import { HOST } from "../utils/host";
 
 export default function Product({ image, name, price, cutPrice, onClick }) {
   return (
-    <div className="col-6 col-md-3 mb-4 d-flex">
+    <div className="col-6 col-md-2">
+      {" "}
+      {/* 🔥 more items per row */}
       <div
-        className="w-100 text-center d-flex flex-column justify-content-between"
+        onClick={onClick}
         style={{
-          height: "280px", // 🔥 increased height
-          borderRadius: "14px",
-          border: "1px solid #ddd",
+          borderRadius: "8px",
+          border: "1px solid #e6e6e6",
           background: "#fff",
-          boxShadow: "0 3px 10px rgba(0,0,0,0.08)",
-          padding: "12px",
+          padding: "6px", // minimal padding
+          cursor: "pointer",
+          height: "160px", // 🔥 very small
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
         }}
       >
-        {/* Image */}
-        <div
-          role="button"
-          onClick={onClick}
+        {/* IMAGE */}
+        <img
+          src={`${HOST}${image}`}
+          alt={name}
           style={{
-            overflow: "hidden",
-            borderRadius: "10px",
+            width: "100%",
+            height: "55px", // 🔥 very small image
+            objectFit: "cover",
+            borderRadius: "5px",
           }}
-        >
-          <img
-            src={`${HOST}${image}`}
-            alt={name}
-            className="w-100"
-            style={{
-              height: "150px", // 🔥 bigger image
-              objectFit: "cover",
-            }}
-          />
-        </div>
+        />
 
-        {/* Name */}
+        {/* NAME */}
         <div
-          className="fw-semibold mt-2"
           style={{
-            fontSize: "20px", // 🔥 bigger text
-            minHeight: "40px", // keeps alignment same
+            fontSize: "11px",
+            fontWeight: "600",
+            textAlign: "center",
+            minHeight: "26px",
           }}
         >
           {name}
         </div>
 
-        {/* Price Section */}
-        <div className="d-flex flex-column align-items-center">
-          {/* Price Badge */}
-          <div
+        {/* PRICE */}
+        <div className="text-center">
+          <span
             style={{
               background: "#FFC107",
-              borderRadius: "8px",
+              padding: "2px 6px",
+              borderRadius: "4px",
+              fontSize: "10px",
               fontWeight: "600",
-              fontSize: "15px", // 🔥 bigger price
-              padding: "6px 14px",
             }}
           >
             ₹ {price}
-          </div>
+          </span>
 
-          {/* Cut Price */}
           {cutPrice && (
             <div
-              className="text-muted mt-1"
               style={{
+                fontSize: "9px",
+                color: "#888",
                 textDecoration: "line-through",
-                fontSize: "18px",
               }}
             >
               ₹ {cutPrice}
