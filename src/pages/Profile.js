@@ -1,23 +1,20 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 import {
   getUserDetails,
   updateUserProfile,
 } from "../redux/actions/authActions";
-// import { updateUserProfile } from "../redux/actions/authActions";
 
 export default function Profile() {
   const dispatch = useDispatch();
-  const { user, loading } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
 
-  const [showEditModal, setShowEditModal] = useState(false);
-
+  const [isEditMode, setIsEditMode] = useState(false);
   const [editName, setEditName] = useState("");
   const [editGender, setEditGender] = useState("");
-  const [editAddress, setEditAddress] = useState("");
 
-  /* 🔐 Fetch user when profile page opens */
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token && !user) {
@@ -25,17 +22,14 @@ export default function Profile() {
     }
   }, [dispatch, user]);
 
-  /* 🧠 Sync form fields when user data arrives */
   useEffect(() => {
     if (user) {
       setEditName(user.name || "");
       setEditGender(user.gender || "");
-      setEditAddress(user.address || "");
     }
   }, [user]);
 
-  /* 💾 Save profile */
-  const saveProfileHandler = () => {
+  const handleSave = () => {
     if (!editName.trim()) {
       alert("Name is required");
       return;
@@ -45,157 +39,288 @@ export default function Profile() {
       updateUserProfile({
         name: editName,
         gender: editGender,
-        address: editAddress,
       }),
     );
-    setShowEditModal(false);
+
+    setIsEditMode(false);
   };
+
+  const handleCancel = () => {
+    setEditName(user?.name || "");
+    setEditGender(user?.gender || "");
+    setIsEditMode(false);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("mobile_number");
+    window.location.href = "/login";
+  };
+
+  const mobileNumber =
+    user?.user_id || localStorage.getItem("mobile_number") || "";
 
   return (
     <>
       <Header />
 
-      <div className="container mt-4">
-        <div className="row">
-          <div className="col-md-3">
-            <div className="card shadow-sm" style={{ borderRadius: "12px" }}>
-              {/* Header */}
+      <div
+        style={{
+          background: "#f5f5f5",
+          minHeight: "100vh",
+          padding: "30px 0",
+        }}
+      >
+        <div className="container">
+          <div className="row g-3">
+            {/* LEFT PROFILE CARD */}
+            <div className="col-md-3">
               <div
-                className="p-3 text-center"
-                style={{ background: "#FFC500" }}
+                style={{
+                  background: "#fff",
+                  border: "1px solid #ddd",
+                  minHeight: "100%",
+                }}
               >
-                <h5 className="m-0">My Profile</h5>
-              </div>
-
-              {/* Body */}
-              <div className="p-3 text-center">
-                <i
-                  className="bi bi-person-circle mb-3"
-                  style={{ fontSize: "70px", color: "#6c757d" }}
-                />
-
-                <div className="text-start ps-3 ml-2">
-                  <p>
-                    <b style={{ color: "#444" }}>Name:</b>{" "}
-                    <span className="text-muted">{user?.name || "User"}</span>
-                  </p>
-                  <p>
-                    <b style={{ color: "#444" }}>Gender:</b>{" "}
-                    <span className="text-muted">{user?.gender || "-"}</span>
-                  </p>
-                  <p>
-                    <b style={{ color: "#444" }}>Mobile:</b>{" "}
-                    <span className="text-muted">{user?.user_id || "-"}</span>
-                  </p>
-                  <p>
-                    <b style={{ color: "#444" }}>Address:</b>{" "}
-                    <span className="text-muted">
-                      {user?.address || "Not added"}
-                    </span>
-                  </p>
-                </div>
-
-                <button
-                  className="btn w-100"
+                <div
                   style={{
-                    backgroundColor: "#FFC500",
-                    color: "#212529",
-                    fontWeight: "bold",
+                    background: "#ead06a",
+                    padding: "10px",
+                    fontWeight: "600",
+                    textAlign: "center",
+                    fontSize: "16px",
                   }}
-                  onClick={() => setShowEditModal(true)}
                 >
-                  Edit Profile
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-9">
-            <div className="card shadow-sm" style={{ borderRadius: "12px" }}>
-              <div
-                className="p-3 text-center"
-                style={{ background: "#FFC500" }}
-              >
-                <h5 className="m-0">Personal Details</h5>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ================= EDIT PROFILE MODAL ================= */}
-      {showEditModal && (
-        <div
-          className="modal show fade d-block"
-          style={{ background: "rgba(0,0,0,0.5)" }}
-        >
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5>Edit Profile</h5>
-                <button
-                  className="btn-close"
-                  onClick={() => setShowEditModal(false)}
-                />
-              </div>
-
-              <div className="modal-body">
-                {/* NAME */}
-                <div className="mb-3">
-                  <label className="form-label">Name</label>
-                  <input
-                    className="form-control"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    placeholder="Enter your name"
-                  />
+                  My Profile
                 </div>
 
-                {/* GENDER */}
-                <div className="mb-3">
-                  <label className="form-label">Gender</label>
-                  <select
-                    className="form-select"
-                    value={editGender}
-                    onChange={(e) => setEditGender(e.target.value)}
+                <div className="text-center py-4 px-3">
+                  <i
+                    className="bi bi-person-circle"
+                    style={{
+                      fontSize: "72px",
+                      color: "#8c8c8c",
+                      lineHeight: 1,
+                    }}
+                  ></i>
+
+                  <div
+                    style={{
+                      marginTop: "8px",
+                      fontSize: "14px",
+                      color: "#6c757d",
+                      fontWeight: "500",
+                    }}
                   >
-                    <option value="">Select</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-
-                {/* ADDRESS */}
-                <div className="mb-3">
-                  <label className="form-label">Address</label>
-                  <textarea
-                    className="form-control"
-                    rows="3"
-                    value={editAddress}
-                    onChange={(e) => setEditAddress(e.target.value)}
-                    placeholder="Enter your full address"
-                  />
+                    {user?.name || "User Name"}
+                  </div>
                 </div>
               </div>
+            </div>
 
-              <div className="modal-footer">
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setShowEditModal(false)}
+            {/* RIGHT DETAILS SECTION */}
+            <div className="col-md-9">
+              <div
+                style={{
+                  background: "#fff",
+                  border: "1px solid #ddd",
+                  padding: "20px",
+                  minHeight: "420px",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    borderBottom: "1px solid #ddd",
+                    paddingBottom: "8px",
+                    marginBottom: "20px",
+                  }}
                 >
-                  Cancel
-                </button>
-                <button
-                  className="btn btn-primary"
-                  onClick={saveProfileHandler}
+                  <h4
+                    style={{
+                      margin: 0,
+                      fontSize: "28px",
+                      fontWeight: "500",
+                      color: "#555",
+                    }}
+                  >
+                    Personal Details
+                  </h4>
+
+                  {!isEditMode && (
+                    <button
+                      onClick={() => setIsEditMode(true)}
+                      style={{
+                        background: "#f4c400",
+                        border: "none",
+                        padding: "4px 18px",
+                        fontWeight: "600",
+                        fontSize: "14px",
+                      }}
+                    >
+                      Edit
+                    </button>
+                  )}
+                </div>
+
+                <div className="row">
+                  <div className="col-md-6 mb-4">
+                    <label
+                      style={{
+                        display: "block",
+                        fontSize: "14px",
+                        color: "#666",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      disabled={!isEditMode}
+                      style={{
+                        width: "100%",
+                        height: "42px",
+                        border: "none",
+                        background: "#e9e9e9",
+                        padding: "0 12px",
+                        outline: "none",
+                        fontSize: "14px",
+                      }}
+                    />
+                  </div>
+
+                  <div className="col-md-6 mb-4">
+                    <label
+                      style={{
+                        display: "block",
+                        fontSize: "14px",
+                        color: "#666",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      Gender
+                    </label>
+
+                    {isEditMode ? (
+                      <select
+                        value={editGender}
+                        onChange={(e) => setEditGender(e.target.value)}
+                        style={{
+                          width: "100%",
+                          height: "42px",
+                          border: "none",
+                          background: "#e9e9e9",
+                          padding: "0 12px",
+                          outline: "none",
+                          fontSize: "14px",
+                        }}
+                      >
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        value={editGender}
+                        disabled
+                        style={{
+                          width: "100%",
+                          height: "42px",
+                          border: "none",
+                          background: "#e9e9e9",
+                          padding: "0 12px",
+                          outline: "none",
+                          fontSize: "14px",
+                        }}
+                      />
+                    )}
+                  </div>
+
+                  <div className="col-md-6 mb-4">
+                    <label
+                      style={{
+                        display: "block",
+                        fontSize: "14px",
+                        color: "#666",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      Mobile Number
+                    </label>
+                    <input
+                      type="text"
+                      value={mobileNumber}
+                      disabled
+                      readOnly
+                      style={{
+                        width: "100%",
+                        height: "42px",
+                        border: "none",
+                        background: "#e9e9e9",
+                        padding: "0 12px",
+                        outline: "none",
+                        fontSize: "14px",
+                        color: "#555",
+                        cursor: "not-allowed",
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: "12px",
+                    marginTop: "40px",
+                  }}
                 >
-                  Save Changes
-                </button>
+                  {isEditMode && (
+                    <>
+                      <button
+                        onClick={handleSave}
+                        style={{
+                          background: "#f4c400",
+                          border: "none",
+                          padding: "7px 18px",
+                          minWidth: "85px",
+                          fontWeight: "600",
+                          fontSize: "14px",
+                        }}
+                      >
+                        Save
+                      </button>
+
+                      <button
+                        onClick={handleCancel}
+                        style={{
+                          background: "#fff",
+                          border: "1px solid #cfcfcf",
+                          padding: "7px 18px",
+                          minWidth: "85px",
+                          fontSize: "14px",
+                          color: "#555",
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      )}
+
+        <Footer />
+      </div>
     </>
   );
 }

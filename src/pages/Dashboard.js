@@ -43,27 +43,35 @@ export default function Dashboard() {
   if (error) return <p className="text-danger text-center">{error}</p>;
 
   return (
-    <div style={{ background: "#fff" }}>
+    <div
+      style={{
+        background: "#f7f7f7",
+        fontFamily: "'Inter', 'Segoe UI', sans-serif",
+      }}
+    >
       <Header />
 
-      {/* ✅ MINIMUM SIDE SPACING */}
       <div
         style={{
+          width: "100%",
+          maxWidth: "1500px", // increased width
           margin: "0 auto",
-          padding: "20px",
+          padding: "20px 12px", // reduced left-right space
         }}
       >
         {Object.keys(groupedData).map((category, index) => (
-          <div key={index} className="mb-3">
+          <div key={index} className="mb-4">
             {/* CATEGORY */}
             <div
               style={{
-                background: "#f5d36b",
-                padding: "4px 8px",
+                background: "#f4bf00",
+                padding: "6px 14px",
                 fontWeight: "600",
-                borderRadius: "4px",
-                fontSize: "12px",
+                borderRadius: "6px",
+                fontSize: "20px",
                 display: "inline-block",
+                color: "#222",
+                letterSpacing: "0.3px",
               }}
             >
               {category} Services
@@ -71,15 +79,27 @@ export default function Dashboard() {
 
             {/* SUBCATEGORY */}
             {groupedData[category].map((sub, i) => (
-              <div key={i} className="mt-2">
-                <h6 style={{ fontSize: "12px", fontWeight: "600" }}>
+              <div key={i} className="mt-4">
+                <h5
+                  style={{
+                    fontWeight: "600",
+                    fontSize: "22px",
+                    color: "#333",
+                    marginBottom: "6px",
+                  }}
+                >
                   {sub.subcategory_name}
-                </h6>
+                </h5>
 
-                <hr style={{ margin: "4px 0 8px" }} />
+                <hr
+                  style={{
+                    margin: "6px 0 12px",
+                    borderColor: "#e0e0e0",
+                  }}
+                />
 
                 {/* GRID */}
-                <div className="row g-2">
+                <div className="row g-4">
                   {sub.services.map((service) => (
                     <Product
                       key={service.id}
@@ -91,6 +111,12 @@ export default function Dashboard() {
                     />
                   ))}
                 </div>
+                <hr
+                  style={{
+                    margin: "6px 0 12px",
+                    borderColor: "#2d2c2c",
+                  }}
+                />
               </div>
             ))}
           </div>

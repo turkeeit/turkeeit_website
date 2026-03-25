@@ -3,56 +3,57 @@ import { HOST } from "../utils/host";
 
 export default function Product({ image, name, price, cutPrice, onClick }) {
   return (
-    <div className="col-6 col-md-2">
+    <div className="col-6 col-md-3 mb-4 mt-4 px-2 d-flex">
       {" "}
       {/* 🔥 more items per row */}
       <div
+        className="w-100 d-flex flex-column text-center"
         onClick={onClick}
         style={{
-          borderRadius: "8px",
-          border: "1px solid #e6e6e6",
+          height: "380px", // 🔥 increased height
+          padding: "15px",
+          borderRadius: "12px",
+          border: "1px solid #ddd",
           background: "#fff",
-          padding: "6px", // minimal padding
+          boxShadow: "0 3px 10px rgba(0,0,0,0.08)",
           cursor: "pointer",
-          height: "160px", // 🔥 very small
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
+          transition: "0.3s",
         }}
+        onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.03)")}
+        onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
       >
         {/* IMAGE */}
         <img
+          className="w-100"
           src={`${HOST}${image}`}
           alt={name}
           style={{
-            width: "100%",
-            height: "55px", // 🔥 very small image
+            height: "190px", // 🔥 taller image
             objectFit: "cover",
-            borderRadius: "5px",
+            borderRadius: "8px",
           }}
         />
 
         {/* NAME */}
         <div
+          className="fw-semibold mt-3"
           style={{
-            fontSize: "11px",
-            fontWeight: "600",
-            textAlign: "center",
-            minHeight: "26px",
+            fontSize: "20px",
+            minHeight: "44px",
           }}
         >
           {name}
         </div>
 
         {/* PRICE */}
-        <div className="text-center">
+        <div className="text-center mt-2">
           <span
             style={{
               background: "#FFC107",
-              padding: "2px 6px",
-              borderRadius: "4px",
-              fontSize: "10px",
+              padding: "8px 14px",
+              borderRadius: "6px",
               fontWeight: "600",
+              fontSize: "18px",
             }}
           >
             ₹ {price}
@@ -60,10 +61,11 @@ export default function Product({ image, name, price, cutPrice, onClick }) {
 
           {cutPrice && (
             <div
+              className="text-muted mt-4"
               style={{
-                fontSize: "9px",
-                color: "#888",
                 textDecoration: "line-through",
+                fontSize: "18px",
+                color: "#888",
               }}
             >
               ₹ {cutPrice}

@@ -27,6 +27,15 @@ export default function Header() {
     (state) => state.auth,
   );
 
+  // CHANGE 1: get cart items from redux
+  const cartItems = useSelector((state) => state.cart.items || []);
+
+  // CHANGE 2: total quantity (not just items count)
+  const cartCount = cartItems.reduce(
+    (sum, item) => sum + Number(item.qty || 1),
+    0,
+  );
+
   // closemenu
   useEffect(() => {
     const closeMenu = () => setShowProfileMenu(false);
@@ -100,50 +109,113 @@ export default function Header() {
     <>
       {/* ================= TOP NAVBAR ================= */}
       <nav
-        className="navbar shadow-sm px-3"
-        style={{ backgroundColor: "#FFC500" }}
+        className="navbar shadow-sm"
+        style={{
+          backgroundColor: "#FFC500",
+          height: "75px", // 🔥 increased height
+        }}
       >
-        <div className="container-fluid">
-          <div className="col-2 d-flex align-items-center">
-            <img src={logo} alt="Turkeeit" style={{ height: "45px" }} />
-            <span className="ms-2 fw-bold">Turkeeit</span>
+        <div className="container-fluid d-flex align-items-center px-4">
+          {/* 🔥 LEFT: Logo */}
+          <div className="col-3 d-flex align-items-center">
+            <img
+              src={logo}
+              alt="Turkeeit"
+              style={{
+                height: "50px", // 🔥 bigger logo
+                objectFit: "contain",
+              }}
+            />
+            <span
+              className="ms-2 fw-bold"
+              style={{
+                fontSize: "20px", // 🔥 better text size
+                color: "#000",
+              }}
+            >
+              Turkeeit
+            </span>
           </div>
 
-          <div className="col-7 d-flex justify-content-center">
-            <input className="form-control" placeholder="Search services..." />
-            <button className="btn btn-search ms-2">Search</button>
+          {/* 🔥 CENTER: Search */}
+          <div className="col-6 d-flex justify-content-center align-items-center">
+            <div className="d-flex w-75">
+              <input
+                className="form-control"
+                placeholder="Search services..."
+                style={{
+                  height: "42px",
+                  fontSize: "14px",
+                  borderRadius: "6px 0 0 6px",
+                }}
+              />
+              <button
+                className="btn"
+                style={{
+                  background: "#000",
+                  color: "#fff",
+                  height: "42px",
+                  padding: "0 18px",
+                  borderRadius: "0 6px 6px 0",
+                  fontSize: "14px",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#333";
+                  e.currentTarget.style.transform = "scale(1.05)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#000";
+                  e.currentTarget.style.transform = "scale(1)";
+                }}
+              >
+                Search
+              </button>
+            </div>
           </div>
 
+          {/* 🔥 RIGHT: Cart + Profile / Signin */}
           <div className="col-3 d-flex justify-content-end align-items-center gap-3">
-            {/* Phone */}
-
-            {/* If user logged in */}
             {userName ? (
               <>
-                {/* Cart Icon */}
+                {/* Cart */}
                 <div
                   className="position-relative"
                   style={{ cursor: "pointer" }}
                   onClick={() => navigate("/cart")}
                 >
-                  <i className="bi bi-cart fs-5"></i>
+                  <i className="bi bi-cart3" style={{ fontSize: "20px" }}></i>
 
-                  {/* Cart Count Badge */}
-                  {3 > 0 && (
+                  {/* CHANGE 3: show only if cart has items */}
+                  {cartCount > 0 && (
                     <span
                       className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                      style={{ fontSize: "10px" }}
+                      style={{
+                        fontSize: "10px",
+                        minWidth: "18px",
+                        height: "18px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
                     >
-                      {3}
+                      {cartCount}
                     </span>
                   )}
                 </div>
 
-                {/* Profile Icon */}
+                {/* Profile */}
                 <div className="position-relative">
                   <div
-                    className="rounded-circle bg-black text-white d-flex justify-content-center align-items-center fw-semibold"
-                    style={{ height: "36px", width: "36px", cursor: "pointer" }}
+                    className="rounded-circle d-flex justify-content-center align-items-center fw-semibold"
+                    style={{
+                      height: "40px",
+                      width: "40px",
+                      background: "#000",
+                      color: "#fff",
+                      fontSize: "16px",
+                      cursor: "pointer",
+                    }}
                     onClick={(e) => {
                       e.stopPropagation();
                       setShowProfileMenu(!showProfileMenu);
@@ -155,17 +227,23 @@ export default function Header() {
                   {showProfileMenu && (
                     <div
                       className="position-absolute end-0 mt-2 bg-white border rounded shadow"
-                      style={{ width: "160px", zIndex: 999 }}
+                      style={{
+                        width: "180px",
+                        zIndex: 999,
+                        borderRadius: "8px",
+                      }}
                     >
                       <div
-                        className="dropdown-item py-2 px-3"
+                        className="py-2 px-3"
+                        style={{ cursor: "pointer" }}
                         onClick={() => navigate("/user/profile")}
                       >
                         Profile
                       </div>
 
                       <div
-                        className="dropdown-item py-2 px-3"
+                        className="py-2 px-3"
+                        style={{ cursor: "pointer" }}
                         onClick={() => navigate("/user/orders")}
                       >
                         My Orders
@@ -174,7 +252,8 @@ export default function Header() {
                       <hr className="my-1" />
 
                       <div
-                        className="dropdown-item py-2 px-3 text-danger"
+                        className="py-2 px-3 text-danger"
+                        style={{ cursor: "pointer" }}
                         onClick={handleLogout}
                       >
                         Logout
@@ -185,8 +264,24 @@ export default function Header() {
               </>
             ) : (
               <button
-                className="btn btn-signin"
+                className="btn"
                 onClick={() => setShowModal(true)}
+                style={{
+                  background: "#000", // 🔥 same as search
+                  color: "#fff",
+                  padding: "8px 18px",
+                  fontSize: "14px",
+                  borderRadius: "6px",
+                  transition: "all 0.3s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#333";
+                  e.currentTarget.style.transform = "scale(1.05)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#000";
+                  e.currentTarget.style.transform = "scale(1)";
+                }}
               >
                 Sign In
               </button>
@@ -202,7 +297,7 @@ export default function Header() {
             <li className="nav-item">
               <button
                 className="nav-link btn px-4 fw-bold category-btn"
-                onClick={() => goToCategory("Cleaning Services")}
+                onClick={() => goToCategory("Cleaning")}
               >
                 {" "}
                 Cleaning{" "}
@@ -211,7 +306,7 @@ export default function Header() {
             <li className="nav-item">
               <button
                 className="nav-link btn px-4 fw-bold"
-                onClick={() => goToCategory("Electrical Services")}
+                onClick={() => goToCategory("Electrical")}
               >
                 {" "}
                 Electrical{" "}
@@ -220,7 +315,7 @@ export default function Header() {
             <li className="nav-item">
               <button
                 className="nav-link btn px-4 fw-bold"
-                onClick={() => goToCategory("Plumbing Services")}
+                onClick={() => goToCategory("Plumbing")}
               >
                 {" "}
                 Plumbing{" "}
@@ -229,7 +324,7 @@ export default function Header() {
             <li className="nav-item">
               <button
                 className="nav-link btn px-4 fw-bold"
-                onClick={() => goToCategory("Carpenter Services")}
+                onClick={() => goToCategory("Carpenter")}
               >
                 {" "}
                 Carpenter{" "}
@@ -238,7 +333,7 @@ export default function Header() {
             <li className="nav-item">
               <button
                 className="nav-link btn px-4 fw-bold"
-                onClick={() => goToCategory("Painting Services")}
+                onClick={() => goToCategory("Painting")}
               >
                 {" "}
                 Painting{" "}
@@ -247,7 +342,7 @@ export default function Header() {
             <li className="nav-item">
               <button
                 className="nav-link btn px-4 fw-bold"
-                onClick={() => goToCategory("AC Services")}
+                onClick={() => goToCategory("AC Service")}
               >
                 {" "}
                 AC Service{" "}

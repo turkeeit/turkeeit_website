@@ -88,6 +88,7 @@ export const logout = () => (dispatch) => {
   // Clear storage
   localStorage.removeItem("token");
   localStorage.removeItem("user");
+  // localStorage.removeItem("mobile_number"); // ✅ important
 
   dispatch({ type: "LOGOUT" });
 };
