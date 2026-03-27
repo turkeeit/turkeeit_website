@@ -1,37 +1,68 @@
 import Header from "../components/Header";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useSelector } from "react-redux";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const FONT_FAMILY = "'Inter', 'Segoe UI', sans-serif";
 
 export default function BookingSlot() {
   const cartItems = useSelector((state) => state.cart.items || []);
+  const { user } = useSelector((state) => state.auth || {});
 
-  const [selectedDate, setSelectedDate] = useState("");
-  const [selectedTime, setSelectedTime] = useState("9:00 AM");
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const timeSlots = ["9:00 AM", "11:00 AM", "1:00 PM", "3:00 PM", "5:00 PM"];
 
-  // ✅ LOAD FROM LOCALSTORAGE (FIX FOR REFRESH)
-  useEffect(() => {
-    const saved = localStorage.getItem("bookingSlot");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      setSelectedDate(parsed.date || "");
-      setSelectedTime(parsed.time || "9:00 AM");
+  const getTodayDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const convertSlotTo24Hour = (slot) => {
+    const [time, modifier] = slot.split(" ");
+    let [hours, minutes] = time.split(":").map(Number);
+
+    if (modifier === "PM" && hours !== 12) hours += 12;
+    if (modifier === "AM" && hours === 12) hours = 0;
+
+    return { hours, minutes };
+  };
+
+  const getNextAvailableSlot = (date) => {
+    const todayStr = getTodayDate();
+
+    if (date !== todayStr) {
+      return timeSlots[0];
     }
-  }, []);
-  // ✅ AUTO SAVE WHEN CHANGE
-  useEffect(() => {
-    localStorage.setItem(
-      "bookingSlot",
-      JSON.stringify({
-        date: selectedDate,
-        time: selectedTime,
-      }),
-    );
-  }, [selectedDate, selectedTime]);
+
+    const now = new Date();
+
+    for (let i = 0; i < timeSlots.length; i++) {
+      const { hours, minutes } = convertSlotTo24Hour(timeSlots[i]);
+      const slotDate = new Date();
+      slotDate.setHours(hours, minutes, 0, 0);
+
+      if (slotDate > now) {
+        return timeSlots[i];
+      }
+    }
+
+    return "";
+  };
+
+  const todayDate = getTodayDate();
+  const initialSelectedTime = getNextAvailableSlot(todayDate);
+
+  const [selectedDate, setSelectedDate] = useState(todayDate);
+  const [selectedTime, setSelectedTime] = useState(initialSelectedTime);
+
+  const [savedDate, setSavedDate] = useState("");
+  const [savedTime, setSavedTime] = useState("");
 
   const subtotal = useMemo(() => {
     return cartItems.reduce((sum, item) => {
@@ -44,11 +75,36 @@ export default function BookingSlot() {
   const platformFee = cartItems.length > 0 ? 100 : 0;
   const total = subtotal + platformFee;
 
+  const isSlotDisabled = (slot) => {
+    const todayStr = getTodayDate();
+
+    if (selectedDate !== todayStr) return false;
+
+    const now = new Date();
+    const { hours, minutes } = convertSlotTo24Hour(slot);
+
+    const slotDate = new Date();
+    slotDate.setHours(hours, minutes, 0, 0);
+
+    return slotDate <= now;
+  };
+
+  const handleDateChange = (e) => {
+    const newDate = e.target.value;
+    setSelectedDate(newDate);
+
+    const nextSlot = getNextAvailableSlot(newDate);
+    setSelectedTime(nextSlot);
+  };
+
   const handleSave = () => {
     if (!selectedDate || !selectedTime) {
       alert("Please select date and time");
       return;
     }
+
+    setSavedDate(selectedDate);
+    setSavedTime(selectedTime);
 
     localStorage.setItem(
       "bookingSlot",
@@ -62,22 +118,51 @@ export default function BookingSlot() {
   };
 
   const handleCancel = () => {
-    setSelectedDate("");
-    setSelectedTime("");
-    localStorage.removeItem("bookingSlot"); // ✅ important
+    const resetDate = getTodayDate();
+    const resetTime = getNextAvailableSlot(resetDate);
+
+    setSelectedDate(resetDate);
+    setSelectedTime(resetTime);
+    setSavedDate("");
+    setSavedTime("");
+    localStorage.removeItem("bookingSlot");
   };
 
   const handleMakePayment = () => {
-    alert("Next step: payment");
+    if (!savedDate || !savedTime) {
+      alert("Please save date and time slot first");
+      return;
+    }
+
+    navigate("/payment-method", {
+      state: {
+        bookingDate: savedDate,
+        bookingTime: savedTime,
+        orderItems: cartItems,
+        subtotal,
+        platformFee,
+        total,
+        selectedAddress: location.state?.selectedAddress || null,
+
+        // ✅ pass current user details like address
+        userName: user?.name || "User",
+        user_id: user?.user_id || "-",
+      },
+    });
   };
 
   return (
     <>
       <Header />
 
-      <div className="container mt-4 mb-4" style={{ fontFamily: FONT_FAMILY }}>
+      <div
+        className="container mb-4"
+        style={{
+          fontFamily: FONT_FAMILY,
+          marginTop: "40px",
+        }}
+      >
         <div className="row g-4">
-          {/* LEFT */}
           <div className="col-lg-7">
             <div
               className="bg-white shadow-sm"
@@ -98,7 +183,6 @@ export default function BookingSlot() {
               </div>
 
               <div className="p-4">
-                {/* Select Date */}
                 <h3
                   style={{
                     textAlign: "center",
@@ -116,8 +200,8 @@ export default function BookingSlot() {
                     type="date"
                     className="form-control"
                     value={selectedDate}
-                    min={new Date().toISOString().split("T")[0]}
-                    onChange={(e) => setSelectedDate(e.target.value)}
+                    min={todayDate}
+                    onChange={handleDateChange}
                     style={{
                       maxWidth: "260px",
                       height: "46px",
@@ -127,7 +211,6 @@ export default function BookingSlot() {
                   />
                 </div>
 
-                {/* Select Time */}
                 <h3
                   style={{
                     textAlign: "center",
@@ -145,20 +228,28 @@ export default function BookingSlot() {
                 <div className="d-flex flex-wrap gap-4 justify-content-center mt-4">
                   {timeSlots.map((slot) => {
                     const isSelected = selectedTime === slot;
+                    const disabled = isSlotDisabled(slot);
 
                     return (
                       <button
                         key={slot}
                         className="btn"
-                        onClick={() => setSelectedTime(slot)}
+                        onClick={() => !disabled && setSelectedTime(slot)}
+                        disabled={disabled}
                         style={{
                           minWidth: "90px",
                           border: "1px solid #999",
-                          background: isSelected ? "#f4bf00" : "#fff",
-                          color: "#111",
+                          background: disabled
+                            ? "#e9ecef"
+                            : isSelected
+                              ? "#f4bf00"
+                              : "#fff",
+                          color: disabled ? "#999" : "#111",
                           fontWeight: "600",
                           borderRadius: "8px",
                           padding: "8px 14px",
+                          cursor: disabled ? "not-allowed" : "pointer",
+                          opacity: disabled ? 0.7 : 1,
                         }}
                       >
                         {slot}
@@ -166,6 +257,16 @@ export default function BookingSlot() {
                     );
                   })}
                 </div>
+
+                {!selectedTime && (
+                  <p
+                    className="text-center mt-3 mb-0"
+                    style={{ color: "red", fontWeight: "500" }}
+                  >
+                    No time slots available for today. Please select another
+                    date.
+                  </p>
+                )}
 
                 <div className="d-flex justify-content-center gap-4 mt-5">
                   <button
@@ -204,7 +305,6 @@ export default function BookingSlot() {
             </div>
           </div>
 
-          {/* RIGHT */}
           <div className="col-lg-5">
             <div
               className="bg-white shadow-sm p-3"
@@ -230,11 +330,13 @@ export default function BookingSlot() {
                 </h4>
 
                 <div style={{ fontSize: "16px", marginBottom: "10px" }}>
-                  <strong>Date :</strong> {selectedDate || "--/--/----"}
+                  <strong>Date :</strong>{" "}
+                  {savedDate || selectedDate || "--/--/----"}
                 </div>
 
                 <div style={{ fontSize: "16px" }}>
-                  <strong>Time Slot :</strong> {selectedTime || "--"}
+                  <strong>Time Slot :</strong>{" "}
+                  {savedTime || selectedTime || "--"}
                 </div>
               </div>
 
@@ -257,13 +359,13 @@ export default function BookingSlot() {
                     marginBottom: "24px",
                   }}
                 >
-                  {cartItems.map((item) => {
+                  {cartItems.map((item, index) => {
                     const qty = Number(item.qty || 1);
                     const price = Number(item.price || 0);
 
                     return (
                       <div
-                        key={item.service_id}
+                        key={item.service_id || index}
                         className="d-flex justify-content-between mb-2"
                         style={{ fontSize: "15px", color: "#666" }}
                       >

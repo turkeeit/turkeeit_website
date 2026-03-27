@@ -16,6 +16,10 @@ import MyOrders from "./pages/MyOrders";
 import CartPage from "./pages/CartPage";
 import BookingSlot from "./pages/BookingSlot";
 import MyOrderDetails from "./pages/MyOrderDetails";
+import PaymentMethod from "./pages/PaymentMethod";
+import OrderConfirmed from "./pages/OrderConfirmed";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentFailure from "./pages/PaymentFailure";
 
 function App() {
   return (
@@ -34,6 +38,10 @@ function App() {
         <Route path="/user/orders/:orderId" element={<MyOrderDetails />} />
         <Route path="/blogs" element={<BlogPage />} />
         <Route path="/blog-details/:id" element={<BlogDetailsPage />} />
+        <Route path="/payment-method" element={<PaymentMethod />} />
+        <Route path="/order-confirmed" element={<OrderConfirmed />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/payment-failure" element={<PaymentFailure />} />
       </Routes>
     </div>
   );
