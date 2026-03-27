@@ -9,24 +9,27 @@ import {
 
 export default function Profile() {
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth || {});
 
+  const [mobileNumber, setMobileNumber] = useState("");
   const [isEditMode, setIsEditMode] = useState(false);
   const [editName, setEditName] = useState("");
   const [editGender, setEditGender] = useState("");
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token && !user) {
+
+    if (token && !user?.user_id) {
       dispatch(getUserDetails(token));
     }
-  }, [dispatch, user]);
+  }, [dispatch, user?.user_id]);
 
   useEffect(() => {
-    if (user) {
-      setEditName(user.name || "");
-      setEditGender(user.gender || "");
-    }
+    setEditName(user?.name || "");
+    setEditGender(user?.gender || "");
+    setMobileNumber(
+      user?.user_id || localStorage.getItem("mobile_number") || "",
+    );
   }, [user]);
 
   const handleSave = () => {
@@ -48,6 +51,9 @@ export default function Profile() {
   const handleCancel = () => {
     setEditName(user?.name || "");
     setEditGender(user?.gender || "");
+    setMobileNumber(
+      user?.user_id || localStorage.getItem("mobile_number") || "",
+    );
     setIsEditMode(false);
   };
 
@@ -56,9 +62,6 @@ export default function Profile() {
     localStorage.removeItem("mobile_number");
     window.location.href = "/login";
   };
-
-  const mobileNumber =
-    user?.user_id || localStorage.getItem("mobile_number") || "";
 
   return (
     <>
@@ -230,6 +233,7 @@ export default function Profile() {
                         type="text"
                         value={editGender}
                         disabled
+                        readOnly
                         style={{
                           width: "100%",
                           height: "42px",
@@ -254,6 +258,7 @@ export default function Profile() {
                     >
                       Mobile Number
                     </label>
+
                     <input
                       type="text"
                       value={mobileNumber}

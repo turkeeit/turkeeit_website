@@ -35,7 +35,10 @@ function App() {
         <Route path="/user/profile" element={<Profile />} />
         <Route path="/user/orders" element={<MyOrders />} />
         {/* Path for MyOrderDetails ??? */}
-        <Route path="/user/orders/:orderId" element={<MyOrderDetails />} />
+        <Route
+          path="/user/order/details/:orderId"
+          element={<MyOrderDetails />}
+        />
         <Route path="/blogs" element={<BlogPage />} />
         <Route path="/blog-details/:id" element={<BlogDetailsPage />} />
         <Route path="/payment-method" element={<PaymentMethod />} />

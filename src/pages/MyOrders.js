@@ -115,7 +115,9 @@ export default function MyOrders() {
                 return (
                   <div
                     key={order.id || order.order_id}
-                    onClick={() => navigate(`/my-orders/${order.order_id}`)}
+                    onClick={() =>
+                      navigate(`/user/order/details/${order.order_id}`)
+                    }
                     style={{
                       border: "1px solid #e2e2e2",
                       background: "#fff",
@@ -192,15 +194,16 @@ export default function MyOrders() {
                               >
                                 <img
                                   src={
-                                    item.image_url || item.image
-                                      ? `${HOST}${item.image_url || item.image}`
-                                      : "https://via.placeholder.com/110x72?text=Service"
+                                    item.service_image
+                                      ? `${HOST}${item.service_image}`
+                                      : "https://via.placeholder.com/90x70?text=Service"
                                   }
-                                  alt={item.service_name || item.name}
+                                  alt={item.service_name}
                                   style={{
                                     width: "100%",
-                                    height: "100%",
+                                    height: "70px",
                                     objectFit: "cover",
+                                    border: "1px solid #ddd",
                                   }}
                                 />
                               </div>

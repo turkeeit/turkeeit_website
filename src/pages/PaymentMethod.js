@@ -1,17 +1,18 @@
 import Header from "../components/Header";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { createOrder } from "../redux/actions/orderActions";
 import { clearCart } from "../redux/actions/cartActions";
 
 const FONT_FAMILY = "'Inter', 'Segoe UI', sans-serif";
 
-export default function PaymentMethod() {
+export default function PaymentMethodPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
 
-  const [paymentMethod, setPaymentMethod] = useState("COD");
+  const { loading } = useSelector((state) => state.order || {});
 
   const {
     bookingDate,
@@ -21,14 +22,12 @@ export default function PaymentMethod() {
     platformFee = 0,
     total = 0,
     selectedAddress = null,
-    userName: stateUserName,
-    user_id: stateUserId,
   } = location.state || {};
 
-  const { user } = useSelector((state) => state.auth || {});
+  const [paymentMethod, setPaymentMethod] = useState("COD");
 
   const formatAddress = (address) => {
-    if (!address) return "No address added";
+    if (!address) return "";
 
     return [
       address.flat_no,
@@ -43,37 +42,68 @@ export default function PaymentMethod() {
       .join(", ");
   };
 
-  const userName = stateUserName || user?.name || "User";
-  const mobileNumber = stateUserId || user?.user_id || "-";
-
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!paymentMethod) {
       alert("Please select payment method");
       return;
     }
 
-    if (paymentMethod === "COD") {
-      // ✅ COD confirm hote hi cart clear
-      dispatch(clearCart());
+    if (!bookingDate || !bookingTime) {
+      alert("Booking date and time missing");
+      return;
+    }
 
-      navigate("/order-confirmed", {
-        state: {
-          paymentMethod,
-          bookingDate,
-          bookingTime,
-          orderItems,
-          subtotal,
-          platformFee,
-          total,
-          selectedAddress,
-          bookedBy: userName,
-          mobileNumber,
-        },
-      });
-    } else {
-      // ✅ online payment me abhi cart clear mat karo
-      // cart successful payment ke baad clear hoga
-      alert("Next step: open Razorpay for online payment");
+    if (!selectedAddress) {
+      alert("Address missing");
+      return;
+    }
+
+    if (!orderItems.length) {
+      alert("No items found");
+      return;
+    }
+
+    try {
+      const payload = {
+        address: formatAddress(selectedAddress),
+        total_price: total,
+        cart_items: orderItems.map((item) => ({
+          service_id: item.service_id || item.id,
+          quantity: Number(item.qty || item.quantity || 1),
+          price: Number(item.price || 0),
+        })),
+        service_date: bookingDate,
+        service_time: bookingTime,
+        payment_method: paymentMethod,
+      };
+
+      const response = await dispatch(createOrder(payload));
+
+      if (paymentMethod === "COD") {
+        dispatch(clearCart());
+
+        navigate("/order-confirmed", {
+          state: {
+            orderId: response?.order_id,
+            paymentMethod,
+            bookingDate,
+            bookingTime,
+            orderItems,
+            subtotal,
+            platformFee,
+            total,
+            selectedAddress,
+          },
+        });
+      } else {
+        alert("Next step: online payment integration");
+      }
+    } catch (error) {
+      console.error(
+        "Create order error:",
+        error?.response?.data || error.message,
+      );
+      alert(error?.response?.data?.error || "Failed to create order");
     }
   };
 
@@ -81,13 +111,7 @@ export default function PaymentMethod() {
     <>
       <Header />
 
-      <div
-        className="container mb-2"
-        style={{
-          fontFamily: FONT_FAMILY,
-          marginTop: "10px",
-        }}
-      >
+      <div className="container mt-4 mb-4" style={{ fontFamily: FONT_FAMILY }}>
         <div className="row g-4">
           <div className="col-lg-7">
             <div
@@ -161,19 +185,14 @@ export default function PaymentMethod() {
                 </h5>
 
                 <p className="mb-2">
-                  <strong>Booked By:</strong> {userName}
-                </p>
-                <p className="mb-2">
-                  <strong>Mobile Number:</strong> {mobileNumber}
-                </p>
-                <p className="mb-2">
                   <strong>Date:</strong> {bookingDate || "--"}
                 </p>
                 <p className="mb-2">
                   <strong>Time:</strong> {bookingTime || "--"}
                 </p>
                 <p className="mb-0">
-                  <strong>Address:</strong> {formatAddress(selectedAddress)}
+                  <strong>Address:</strong>{" "}
+                  {formatAddress(selectedAddress) || "No address added"}
                 </p>
               </div>
 
@@ -196,6 +215,7 @@ export default function PaymentMethod() {
                 <button
                   className="btn"
                   onClick={handleContinue}
+                  disabled={loading}
                   style={{
                     minWidth: "140px",
                     background: "#008000",
@@ -204,9 +224,10 @@ export default function PaymentMethod() {
                     padding: "10px 20px",
                     fontWeight: "600",
                     color: "#fff",
+                    opacity: loading ? 0.7 : 1,
                   }}
                 >
-                  Confirm
+                  {loading ? "Please wait..." : "Confirm"}
                 </button>
               </div>
             </div>

@@ -135,7 +135,7 @@ export default function Dashboard() {
               style={{
                 background: "#f4bf00",
                 padding: "6px 14px",
-                fontWeight: "650",
+                fontWeight: "550",
                 borderRadius: "6px",
                 fontSize: "22px",
                 display: "inline-block",

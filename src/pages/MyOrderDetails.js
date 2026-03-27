@@ -93,6 +93,8 @@ export default function MyOrderDetails() {
                       fontWeight: "600",
                       fontSize: "16px",
                       marginBottom: "14px",
+                      width: "100%",
+                      textAlign: "center",
                     }}
                   >
                     My Order Details
