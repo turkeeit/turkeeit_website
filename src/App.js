@@ -19,21 +19,23 @@ import MyOrderDetails from "./pages/MyOrderDetails";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/services" replace />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/services" element={<Dashboard />} />
-      <Route path="/service/details" element={<ServiceDetails />} />
-      <Route path="/cart" element={<CartPage />} />
-      <Route path="/order/details" element={<OrderDetails />} />
-      <Route path="/bookingslot" element={<BookingSlot />} />
-      <Route path="/user/profile" element={<Profile />} />
-      <Route path="/user/orders" element={<MyOrders />} />
-      {/* Path for MyOrderDetails ??? */}
-      <Route path="/user/orders/:orderId" element={<MyOrderDetails />} />
-      <Route path="/blogs" element={<BlogPage />} />
-      <Route path="/blog-details/:id" element={<BlogDetailsPage />} />
-    </Routes>
+    <div className="page-wrapper">
+      <Routes>
+        <Route path="/" element={<Navigate to="/services" replace />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/services" element={<Dashboard />} />
+        <Route path="/service/details" element={<ServiceDetails />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/order/details" element={<OrderDetails />} />
+        <Route path="/bookingslot" element={<BookingSlot />} />
+        <Route path="/user/profile" element={<Profile />} />
+        <Route path="/user/orders" element={<MyOrders />} />
+        {/* Path for MyOrderDetails ??? */}
+        <Route path="/user/orders/:orderId" element={<MyOrderDetails />} />
+        <Route path="/blogs" element={<BlogPage />} />
+        <Route path="/blog-details/:id" element={<BlogDetailsPage />} />
+      </Routes>
+    </div>
   );
 }
 

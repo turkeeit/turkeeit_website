@@ -71,7 +71,8 @@ export default function ServiceDetails() {
 
     try {
       await dispatch(addToCart(item));
-      alert("Added to cart successfully");
+      // ✅ no success popup
+      // cart icon count will update automatically from Redux store
     } catch (error) {
       console.error("Add to cart failed:", error);
       alert("Failed to add to cart");

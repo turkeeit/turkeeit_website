@@ -11,7 +11,7 @@ export default function BlogDetailsPage() {
   const navigate = useNavigate();
 
   const { blogDetails, loading, error } = useSelector(
-    (state) => state.blogsData
+    (state) => state.blogsData,
   );
 
   useEffect(() => {

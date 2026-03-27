@@ -4,10 +4,10 @@ import api from "../../api/axiosClient";
 export const createOrder = (cartItems, address, total) => async (dispatch) => {
   try {
     dispatch({ type: "CREATE_ORDER_REQUEST" });
-    console.log("inside order create action");
-    console.log(cartItems, address, total);
+
     const token = localStorage.getItem("token");
-    console.log(`${HOST}/api/createOrder`);
+    const mobileNumber = localStorage.getItem("mobile_number");
+
     const response = await api.post(
       `${HOST}/api/createOrder`,
       {
@@ -19,57 +19,81 @@ export const createOrder = (cartItems, address, total) => async (dispatch) => {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          mobile_number: mobileNumber,
         },
       },
     );
+
     dispatch({
       type: "CREATE_ORDER_SUCCESS",
       payload: response.data,
     });
-    console.log(`create order api call response`, response.data);
+
     return response.data;
   } catch (error) {
     dispatch({
       type: "CREATE_ORDER_FAIL",
-      payload: error.message,
+      payload: error.response?.data?.error || error.message,
     });
+    throw error;
   }
 };
+
 export const createRazorpayOrder = (amount) => async (dispatch) => {
   try {
     dispatch({ type: "RAZORPAY_ORDER_REQUEST" });
 
     const token = localStorage.getItem("token");
+    const mobileNumber = localStorage.getItem("mobile_number");
 
-    const res = await fetch(`${HOST}/api/create-order`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+    const res = await api.post(
+      `${HOST}/api/createOrder`,
+      { amount: amount * 100 },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          mobile_number: mobileNumber,
+        },
       },
-      body: JSON.stringify({ amount: amount * 100 }),
-    });
+    );
 
-    const data = await res.json();
-
-    dispatch({ type: "RAZORPAY_ORDER_SUCCESS", payload: data });
-    return data;
+    dispatch({ type: "RAZORPAY_ORDER_SUCCESS", payload: res.data });
+    return res.data;
   } catch (err) {
-    dispatch({ type: "RAZORPAY_ORDER_FAIL", payload: err.message });
+    dispatch({
+      type: "RAZORPAY_ORDER_FAIL",
+      payload: err.response?.data?.error || err.message,
+    });
+    throw err;
   }
 };
 
+export const verifyPaymentSignature = (paymentData) => async () => {
+  const token = localStorage.getItem("token");
+  const mobileNumber = localStorage.getItem("mobile_number");
+
+  const response = await api.post(`${HOST}/api/verify-signature`, paymentData, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      mobile_number: mobileNumber,
+    },
+  });
+
+  return response.data;
+};
+
 export const updateOrderStatus =
-  (orderId, razorpayOrderId, paymentId, status) => async (dispatch) => {
+  (orderId, razorpayOrderId, paymentId, status, mode = "Online") =>
+  async (dispatch) => {
     try {
-      console.log(
-        `orderId = ${orderId}, razorpayOrderId=${razorpayOrderId},  paymentId=${paymentId}, status=${status}`,
-      );
       dispatch({ type: "SAVE_ORDER_REQUEST" });
 
       const token = localStorage.getItem("token");
+      const mobileNumber = localStorage.getItem("mobile_number");
 
-      const response = await api.put(
+      await api.put(
         `${HOST}/api/updateOrderStatus`,
         {
           order_id: orderId,
@@ -81,14 +105,18 @@ export const updateOrderStatus =
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
-            modeofpayment: "Online",
+            mobile_number: mobileNumber,
+            modeofpayment: mode,
           },
         },
       );
 
-      console.log("order update respo[nse", response);
       dispatch({ type: "SAVE_ORDER_SUCCESS" });
     } catch (err) {
-      dispatch({ type: "SAVE_ORDER_FAIL", payload: err.message });
+      dispatch({
+        type: "SAVE_ORDER_FAIL",
+        payload: err.response?.data?.error || err.message,
+      });
+      throw err;
     }
   };
