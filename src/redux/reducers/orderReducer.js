@@ -1,8 +1,9 @@
 const initialState = {
   orders: [],
   orderDetails: null,
-  order: null, // ✅ new
-  success: false, // ✅ new
+  order: null,
+  updatedOrder: null, // ✅ new
+  success: false,
   loading: false,
   error: null,
 };
@@ -12,6 +13,7 @@ export const orderReducer = (state = initialState, action) => {
     case "ORDERS_REQUEST":
     case "ORDER_DETAILS_REQUEST":
     case "CREATE_ORDER_REQUEST":
+    case "UPDATE_ORDER_STATUS_REQUEST":
       return {
         ...state,
         loading: true,
@@ -41,9 +43,18 @@ export const orderReducer = (state = initialState, action) => {
         success: true,
       };
 
+    case "UPDATE_ORDER_STATUS_SUCCESS":
+      return {
+        ...state,
+        loading: false,
+        updatedOrder: action.payload,
+        success: true,
+      };
+
     case "ORDERS_FAIL":
     case "ORDER_DETAILS_FAIL":
     case "CREATE_ORDER_FAIL":
+    case "UPDATE_ORDER_STATUS_FAIL":
       return {
         ...state,
         loading: false,
@@ -58,6 +69,7 @@ export const orderReducer = (state = initialState, action) => {
         error: null,
         success: false,
         order: null,
+        updatedOrder: null,
       };
 
     default:

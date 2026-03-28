@@ -72,7 +72,7 @@ export default function PaymentSuccess() {
 
                 <button
                   className="btn btn-outline-dark"
-                  onClick={() => navigate("/myorders")}
+                  onClick={() => navigate("/user/orders")}
                   style={{
                     borderRadius: "8px",
                     padding: "10px 18px",

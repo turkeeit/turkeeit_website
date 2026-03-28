@@ -19,7 +19,7 @@ export const getUserOrders = (token) => async (dispatch) => {
   } catch (err) {
     dispatch({
       type: "ORDERS_FAIL",
-      payload: err.message,
+      payload: err?.response?.data?.error || err.message,
     });
   }
 };
@@ -47,12 +47,12 @@ export const getOrderDetails = (orderId) => async (dispatch) => {
   } catch (err) {
     dispatch({
       type: "ORDER_DETAILS_FAIL",
-      payload: err.message,
+      payload: err?.response?.data?.error || err.message,
     });
   }
 };
 
-// ================= CREATE ORDER (🔥 NEW IMPORTANT) =================
+// ================= CREATE ORDER =================
 export const createOrder = (orderData) => async (dispatch) => {
   try {
     dispatch({ type: "CREATE_ORDER_REQUEST" });
@@ -64,6 +64,7 @@ export const createOrder = (orderData) => async (dispatch) => {
       headers: {
         Authorization: `Bearer ${token}`,
         mobile_number,
+        "Content-Type": "application/json",
       },
     });
 
@@ -74,14 +75,50 @@ export const createOrder = (orderData) => async (dispatch) => {
       payload: res.data,
     });
 
-    return res.data; // 👈 IMPORTANT (PaymentMethod me use karenge)
+    return res.data;
   } catch (err) {
     dispatch({
       type: "CREATE_ORDER_FAIL",
       payload: err?.response?.data?.error || err.message,
     });
 
-    throw err; // 👈 IMPORTANT (error handle karne ke liye)
+    throw err;
+  }
+};
+
+// ================= UPDATE ORDER STATUS =================
+export const updateOrderStatus = (updateData) => async (dispatch) => {
+  try {
+    dispatch({ type: "UPDATE_ORDER_STATUS_REQUEST" });
+
+    const token = localStorage.getItem("token");
+    const mobile_number = localStorage.getItem("mobile_number");
+
+    console.log("updateOrderStatus payload", updateData);
+
+    const res = await axios.put(`${HOST}/api/updateOrderStatus`, updateData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        mobile_number,
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log("update order status response", res.data);
+
+    dispatch({
+      type: "UPDATE_ORDER_STATUS_SUCCESS",
+      payload: res.data,
+    });
+
+    return res.data;
+  } catch (err) {
+    dispatch({
+      type: "UPDATE_ORDER_STATUS_FAIL",
+      payload: err?.response?.data?.error || err.message,
+    });
+
+    throw err;
   }
 };
 

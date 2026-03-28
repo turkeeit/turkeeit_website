@@ -2,12 +2,12 @@ import Header from "../components/Header";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createOrder } from "../redux/actions/orderActions";
+import { createOrder, updateOrderStatus } from "../redux/actions/orderActions";
 import { clearCart } from "../redux/actions/cartActions";
 
 const FONT_FAMILY = "'Inter', 'Segoe UI', sans-serif";
 
-export default function PaymentMethodPage() {
+export default function PaymentMethod() {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -77,14 +77,33 @@ export default function PaymentMethodPage() {
         payment_method: paymentMethod,
       };
 
+      console.log("createOrder payload:", payload);
+
       const response = await dispatch(createOrder(payload));
 
+      console.log("createOrder response:", response);
+
       if (paymentMethod === "COD") {
+        const updatePayload = {
+          order_id: response?.order_id,
+          payment_method: "COD",
+          order_status: "confirmed",
+          payment_status: "pending",
+          razorpay_order_id: response?.razorpay_order_id || null,
+        };
+
+        console.log("updateOrderStatus payload:", updatePayload);
+
+        const updateResponse = await dispatch(updateOrderStatus(updatePayload));
+
+        console.log("updateOrderStatus response:", updateResponse);
+
         dispatch(clearCart());
 
         navigate("/order-confirmed", {
           state: {
             orderId: response?.order_id,
+            paymentId: updateResponse?.payment_id || null,
             paymentMethod,
             bookingDate,
             bookingTime,
@@ -95,15 +114,17 @@ export default function PaymentMethodPage() {
             selectedAddress,
           },
         });
-      } else {
-        alert("Next step: online payment integration");
+
+        return;
       }
+
+      alert("Next step: online payment integration");
     } catch (error) {
       console.error(
-        "Create order error:",
+        "Order flow error:",
         error?.response?.data || error.message,
       );
-      alert(error?.response?.data?.error || "Failed to create order");
+      alert(error?.response?.data?.error || "Failed to process order");
     }
   };
 
