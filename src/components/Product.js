@@ -1,23 +1,22 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { HOST } from "../utils/host";
+import "./Product.css";
 
 export default function Product({ image, name, price, cutPrice, onClick }) {
   return (
-    <div className="col-6 col-md-3 mb-4 mt-4 px-2 d-flex">
-      {" "}
-      {/* 🔥 more items per row */}
+    <div className="product-grid-item mb-2 px-1 d-flex">
       <div
         className="w-100 d-flex flex-column text-center"
         onClick={onClick}
         style={{
-          height: "380px", // 🔥 increased height
-          padding: "15px",
-          borderRadius: "12px",
-          border: "1px solid #ddd",
+          height: "180px",
+          padding: "10px",
+          borderRadius: "10px",
+          border: "1px solid #e5e5e5",
           background: "#fff",
-          boxShadow: "0 3px 10px rgba(0,0,0,0.08)",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
           cursor: "pointer",
-          transition: "0.3s",
+          transition: "0.25s",
         }}
         onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.03)")}
         onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
@@ -28,48 +27,47 @@ export default function Product({ image, name, price, cutPrice, onClick }) {
           src={`${HOST}${image}`}
           alt={name}
           style={{
-            height: "190px", // 🔥 taller image
+            height: "85px",
             objectFit: "cover",
-            borderRadius: "8px",
+            borderRadius: "6px",
           }}
         />
 
         {/* NAME */}
         <div
-          className="fw-semibold mt-3"
+          className="mt-2"
           style={{
-            fontSize: "20px",
-            minHeight: "44px",
+            fontSize: "14px",
+            fontWeight: "600",
+            lineHeight: "1.2",
+            minHeight: "28px",
+            fontFamily: "'Inter', 'Segoe UI', sans-serif",
           }}
         >
           {name}
         </div>
 
         {/* PRICE */}
-        <div className="text-center mt-2">
+        <div className="mt-1 d-flex justify-content-center align-items-center gap-2">
           <span
             style={{
-              background: "#FFC107",
-              padding: "8px 14px",
+              background: "#FFC500",
+              padding: "5px 8px",
               borderRadius: "6px",
               fontWeight: "600",
-              fontSize: "18px",
+              fontSize: "12px",
             }}
           >
             ₹ {price}
           </span>
 
           {cutPrice && (
-            <div
-              className="text-muted mt-4"
-              style={{
-                textDecoration: "line-through",
-                fontSize: "18px",
-                color: "#888",
-              }}
+            <span
+              className="text-muted text-decoration-line-through"
+              style={{ fontSize: "12px" }}
             >
               ₹ {cutPrice}
-            </div>
+            </span>
           )}
         </div>
       </div>

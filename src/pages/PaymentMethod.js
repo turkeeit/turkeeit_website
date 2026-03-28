@@ -1,9 +1,13 @@
 import Header from "../components/Header";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createOrder, updateOrderStatus } from "../redux/actions/orderActions";
+import {
+  updateOrderStatus,
+  getOrderDetails,
+} from "../redux/actions/orderActions";
 import { clearCart } from "../redux/actions/cartActions";
+import { BRAND_NAME, CURRENCY, DESCRIPTION, RAZORPAY_KEY } from "../utils/host";
 
 const FONT_FAMILY = "'Inter', 'Segoe UI', sans-serif";
 
@@ -12,9 +16,15 @@ export default function PaymentMethod() {
   const location = useLocation();
   const dispatch = useDispatch();
 
-  const { loading } = useSelector((state) => state.order || {});
+  const { loading, orderDetails, order } = useSelector(
+    (state) => state.order || {},
+  );
+  const { user } = useSelector((state) => state.userDetails || {});
+  const authUser = useSelector((state) => state.auth?.user || {});
 
   const {
+    orderId,
+    razorpayOrderId: passedRazorpayOrderId,
     bookingDate,
     bookingTime,
     orderItems = [],
@@ -25,6 +35,7 @@ export default function PaymentMethod() {
   } = location.state || {};
 
   const [paymentMethod, setPaymentMethod] = useState("COD");
+  const [fetchingRazorpayId, setFetchingRazorpayId] = useState(false);
 
   const formatAddress = (address) => {
     if (!address) return "";
@@ -42,7 +53,210 @@ export default function PaymentMethod() {
       .join(", ");
   };
 
+  // ✅ fallback 1: localStorage
+  const latestOrderMeta = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem("latestOrderMeta") || "{}");
+    } catch {
+      return {};
+    }
+  }, []);
+
+  // ✅ DB fetch only if needed
+  useEffect(() => {
+    const fetchOrderDetailsIfNeeded = async () => {
+      if (!orderId) return;
+      if (passedRazorpayOrderId) return;
+      if (
+        latestOrderMeta?.orderId === orderId &&
+        latestOrderMeta?.razorpayOrderId
+      )
+        return;
+
+      try {
+        setFetchingRazorpayId(true);
+        await dispatch(getOrderDetails(orderId));
+      } catch (error) {
+        console.error(
+          "Failed to fetch order details:",
+          error?.response?.data || error.message,
+        );
+      } finally {
+        setFetchingRazorpayId(false);
+      }
+    };
+
+    fetchOrderDetailsIfNeeded();
+  }, [dispatch, orderId, passedRazorpayOrderId, latestOrderMeta]);
+
+  // ✅ final effective value with all fallbacks
+  const effectiveRazorpayOrderId = useMemo(() => {
+    return (
+      passedRazorpayOrderId ||
+      (latestOrderMeta?.orderId === orderId
+        ? latestOrderMeta?.razorpayOrderId
+        : null) ||
+      order?.razorpay_order_id ||
+      orderDetails?.razorpay_order_id ||
+      orderDetails?.order?.razorpay_order_id ||
+      orderDetails?.order_details?.razorpay_order_id ||
+      null
+    );
+  }, [passedRazorpayOrderId, latestOrderMeta, orderId, order, orderDetails]);
+
+  useEffect(() => {
+    console.log("PaymentMethod state:", location.state);
+    console.log("latestOrderMeta:", latestOrderMeta);
+    console.log("redux order:", order);
+    console.log("orderDetails from DB:", orderDetails);
+    console.log("effectiveRazorpayOrderId:", effectiveRazorpayOrderId);
+  }, [
+    location.state,
+    latestOrderMeta,
+    order,
+    orderDetails,
+    effectiveRazorpayOrderId,
+  ]);
+
+  const handleCODConfirm = async () => {
+    const updatePayload = {
+      order_id: orderId,
+      payment_method: "COD",
+      order_status: "confirmed",
+      payment_status: "pending",
+    };
+
+    console.log("COD updateOrderStatus payload:", updatePayload);
+
+    const updateResponse = await dispatch(updateOrderStatus(updatePayload));
+
+    console.log("COD updateOrderStatus response:", updateResponse);
+
+    dispatch(clearCart());
+    localStorage.removeItem("latestOrderMeta");
+
+    navigate("/order-confirmed", {
+      state: {
+        orderId,
+        paymentId: updateResponse?.payment_id || null,
+        paymentMethod: "COD",
+        bookingDate,
+        bookingTime,
+        orderItems,
+        subtotal,
+        platformFee,
+        total,
+        selectedAddress,
+      },
+    });
+  };
+
+  const handleOnlinePayment = async () => {
+    if (!window.Razorpay) {
+      alert("Razorpay SDK not loaded");
+      return;
+    }
+
+    if (!RAZORPAY_KEY) {
+      alert("Razorpay key is missing");
+      return;
+    }
+
+    if (!effectiveRazorpayOrderId) {
+      alert("Razorpay order id missing");
+      return;
+    }
+
+    const options = {
+      key: RAZORPAY_KEY,
+      amount: Number(total) * 100,
+      currency: CURRENCY,
+      name: BRAND_NAME,
+      description: DESCRIPTION,
+      order_id: effectiveRazorpayOrderId,
+      handler: async function (res) {
+        try {
+          const updatePayload = {
+            order_id: orderId,
+            payment_method: "ONLINE",
+            order_status: "confirmed",
+            payment_status: "paid",
+            payment_id: res?.razorpay_payment_id,
+            razorpay_order_id: res?.razorpay_order_id,
+            razorpay_payment_id: res?.razorpay_payment_id,
+            razorpay_signature: res?.razorpay_signature,
+          };
+
+          console.log("ONLINE updateOrderStatus payload:", updatePayload);
+
+          const updateResponse = await dispatch(
+            updateOrderStatus(updatePayload),
+          );
+
+          console.log("ONLINE updateOrderStatus response:", updateResponse);
+
+          dispatch(clearCart());
+          localStorage.removeItem("latestOrderMeta");
+
+          navigate("/order-confirmed", {
+            state: {
+              orderId,
+              paymentId:
+                res?.razorpay_payment_id || updateResponse?.payment_id || null,
+              paymentMethod: "ONLINE",
+              bookingDate,
+              bookingTime,
+              orderItems,
+              subtotal,
+              platformFee,
+              total,
+              selectedAddress,
+            },
+          });
+        } catch (error) {
+          console.error(
+            "Online payment update error:",
+            error?.response?.data || error.message,
+          );
+          alert(
+            error?.response?.data?.error ||
+              "Payment was successful, but order update failed",
+          );
+        }
+      },
+      prefill: {
+        name: user?.name || authUser?.name || "",
+        contact:
+          user?.user_id ||
+          user?.mobile_number ||
+          authUser?.user_id ||
+          authUser?.mobile_number ||
+          "",
+      },
+      theme: { color: "#f4bf00" },
+      modal: {
+        ondismiss: function () {
+          console.log("Razorpay payment popup closed");
+        },
+      },
+    };
+
+    const rzp = new window.Razorpay(options);
+
+    rzp.on("payment.failed", function (response) {
+      console.error("Razorpay payment failed:", response);
+      alert("Payment failed. Please try again.");
+    });
+
+    rzp.open();
+  };
+
   const handleContinue = async () => {
+    if (!orderId) {
+      alert("Order id missing. Please create order first.");
+      return;
+    }
+
     if (!paymentMethod) {
       alert("Please select payment method");
       return;
@@ -63,68 +277,27 @@ export default function PaymentMethod() {
       return;
     }
 
+    if (paymentMethod === "ONLINE" && fetchingRazorpayId) {
+      alert("Please wait, fetching Razorpay order id...");
+      return;
+    }
+
     try {
-      const payload = {
-        address: formatAddress(selectedAddress),
-        total_price: total,
-        cart_items: orderItems.map((item) => ({
-          service_id: item.service_id || item.id,
-          quantity: Number(item.qty || item.quantity || 1),
-          price: Number(item.price || 0),
-        })),
-        service_date: bookingDate,
-        service_time: bookingTime,
-        payment_method: paymentMethod,
-      };
-
-      console.log("createOrder payload:", payload);
-
-      const response = await dispatch(createOrder(payload));
-
-      console.log("createOrder response:", response);
-
       if (paymentMethod === "COD") {
-        const updatePayload = {
-          order_id: response?.order_id,
-          payment_method: "COD",
-          order_status: "confirmed",
-          payment_status: "pending",
-          razorpay_order_id: response?.razorpay_order_id || null,
-        };
-
-        console.log("updateOrderStatus payload:", updatePayload);
-
-        const updateResponse = await dispatch(updateOrderStatus(updatePayload));
-
-        console.log("updateOrderStatus response:", updateResponse);
-
-        dispatch(clearCart());
-
-        navigate("/order-confirmed", {
-          state: {
-            orderId: response?.order_id,
-            paymentId: updateResponse?.payment_id || null,
-            paymentMethod,
-            bookingDate,
-            bookingTime,
-            orderItems,
-            subtotal,
-            platformFee,
-            total,
-            selectedAddress,
-          },
-        });
-
+        await handleCODConfirm();
         return;
       }
 
-      alert("Next step: online payment integration");
+      if (paymentMethod === "ONLINE") {
+        await handleOnlinePayment();
+        return;
+      }
     } catch (error) {
       console.error(
-        "Order flow error:",
+        "Payment method flow error:",
         error?.response?.data || error.message,
       );
-      alert(error?.response?.data?.error || "Failed to process order");
+      alert(error?.response?.data?.error || "Failed to process payment method");
     }
   };
 
@@ -206,11 +379,22 @@ export default function PaymentMethod() {
                 </h5>
 
                 <p className="mb-2">
+                  <strong>Order ID:</strong> {orderId || "--"}
+                </p>
+
+                {/* <p className="mb-2">
+                  <strong>Razorpay Order ID:</strong>{" "}
+                  {effectiveRazorpayOrderId || "--"}
+                </p> */}
+
+                <p className="mb-2">
                   <strong>Date:</strong> {bookingDate || "--"}
                 </p>
+
                 <p className="mb-2">
                   <strong>Time:</strong> {bookingTime || "--"}
                 </p>
+
                 <p className="mb-0">
                   <strong>Address:</strong>{" "}
                   {formatAddress(selectedAddress) || "No address added"}
@@ -236,7 +420,7 @@ export default function PaymentMethod() {
                 <button
                   className="btn"
                   onClick={handleContinue}
-                  disabled={loading}
+                  disabled={loading || fetchingRazorpayId}
                   style={{
                     minWidth: "140px",
                     background: "#008000",
@@ -245,10 +429,10 @@ export default function PaymentMethod() {
                     padding: "10px 20px",
                     fontWeight: "600",
                     color: "#fff",
-                    opacity: loading ? 0.7 : 1,
+                    opacity: loading || fetchingRazorpayId ? 0.7 : 1,
                   }}
                 >
-                  {loading ? "Please wait..." : "Confirm"}
+                  {loading || fetchingRazorpayId ? "Please wait..." : "Confirm"}
                 </button>
               </div>
             </div>

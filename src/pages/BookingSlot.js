@@ -1,14 +1,17 @@
 import Header from "../components/Header";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { createOrder } from "../redux/actions/orderActions";
 
 const FONT_FAMILY = "'Inter', 'Segoe UI', sans-serif";
 
 export default function BookingSlot() {
+  const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart.items || []);
   const { user } = useSelector((state) => state.auth || {});
+  const { loading } = useSelector((state) => state.order || {});
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -36,9 +39,7 @@ export default function BookingSlot() {
   const getNextAvailableSlot = (date) => {
     const todayStr = getTodayDate();
 
-    if (date !== todayStr) {
-      return timeSlots[0];
-    }
+    if (date !== todayStr) return timeSlots[0];
 
     const now = new Date();
 
@@ -47,9 +48,7 @@ export default function BookingSlot() {
       const slotDate = new Date();
       slotDate.setHours(hours, minutes, 0, 0);
 
-      if (slotDate > now) {
-        return timeSlots[i];
-      }
+      if (slotDate > now) return timeSlots[i];
     }
 
     return "";
@@ -60,14 +59,13 @@ export default function BookingSlot() {
 
   const [selectedDate, setSelectedDate] = useState(todayDate);
   const [selectedTime, setSelectedTime] = useState(initialSelectedTime);
-
   const [savedDate, setSavedDate] = useState("");
   const [savedTime, setSavedTime] = useState("");
 
   const subtotal = useMemo(() => {
     return cartItems.reduce((sum, item) => {
       const price = Number(item.price || 0);
-      const qty = Number(item.qty || 1);
+      const qty = Number(item.qty || item.quantity || 1);
       return sum + price * qty;
     }, 0);
   }, [cartItems]);
@@ -77,12 +75,10 @@ export default function BookingSlot() {
 
   const isSlotDisabled = (slot) => {
     const todayStr = getTodayDate();
-
     if (selectedDate !== todayStr) return false;
 
     const now = new Date();
     const { hours, minutes } = convertSlotTo24Hour(slot);
-
     const slotDate = new Date();
     slotDate.setHours(hours, minutes, 0, 0);
 
@@ -92,9 +88,7 @@ export default function BookingSlot() {
   const handleDateChange = (e) => {
     const newDate = e.target.value;
     setSelectedDate(newDate);
-
-    const nextSlot = getNextAvailableSlot(newDate);
-    setSelectedTime(nextSlot);
+    setSelectedTime(getNextAvailableSlot(newDate));
   };
 
   const handleSave = () => {
@@ -126,29 +120,100 @@ export default function BookingSlot() {
     setSavedDate("");
     setSavedTime("");
     localStorage.removeItem("bookingSlot");
+    localStorage.removeItem("latestOrderMeta"); // ✅ added
   };
 
-  const handleMakePayment = () => {
+  const formatAddress = (address) => {
+    if (!address) return "";
+
+    return [
+      address.flat_no,
+      address.building_name,
+      address.area_name,
+      address.landmark,
+      address.city,
+      address.state,
+      address.pincode,
+    ]
+      .filter(Boolean)
+      .join(", ");
+  };
+
+  const handleMakePayment = async () => {
     if (!savedDate || !savedTime) {
       alert("Please save date and time slot first");
       return;
     }
 
-    navigate("/payment-method", {
-      state: {
-        bookingDate: savedDate,
-        bookingTime: savedTime,
-        orderItems: cartItems,
-        subtotal,
-        platformFee,
-        total,
-        selectedAddress: location.state?.selectedAddress || null,
+    const selectedAddress = location.state?.selectedAddress || null;
 
-        // ✅ pass current user details like address
-        userName: user?.name || "User",
-        user_id: user?.user_id || "-",
-      },
-    });
+    if (!selectedAddress) {
+      alert("Please select address first");
+      return;
+    }
+
+    if (!cartItems.length) {
+      alert("No items found in cart");
+      return;
+    }
+
+    try {
+      const payload = {
+        address: formatAddress(selectedAddress),
+        total_price: Number(total),
+        service_date: savedDate,
+        service_time: savedTime,
+        cart_items: cartItems.map((item) => ({
+          service_id: item.service_id || item.id,
+          quantity: Number(item.qty || item.quantity || 1),
+          price: Number(item.price || 0),
+        })),
+      };
+
+      console.log("createOrder payload:", payload);
+
+      const response = await dispatch(createOrder(payload));
+
+      console.log("createOrder response:", response);
+
+      if (!response?.order_id) {
+        alert("Order creation failed");
+        return;
+      }
+
+      // ✅ ADDED:
+      // razorpay_order_id ko localStorage me bhi save kar diya
+      // taki PaymentMethod page par fallback mil sake
+      const latestOrderMeta = {
+        orderId: response.order_id || null,
+        razorpayOrderId: response.razorpay_order_id || null,
+      };
+
+      localStorage.setItem("latestOrderMeta", JSON.stringify(latestOrderMeta));
+      console.log("saved latestOrderMeta:", latestOrderMeta);
+
+      navigate("/payment-method", {
+        state: {
+          orderId: response.order_id,
+          razorpayOrderId: response.razorpay_order_id || null,
+          bookingDate: savedDate,
+          bookingTime: savedTime,
+          orderItems: cartItems,
+          subtotal,
+          platformFee,
+          total,
+          selectedAddress,
+          userName: user?.name || "User",
+          user_id: user?.user_id || "",
+        },
+      });
+    } catch (error) {
+      console.error(
+        "Create order error:",
+        error?.response?.data || error.message,
+      );
+      alert(error?.response?.data?.error || "Failed to create order");
+    }
   };
 
   return (
@@ -166,9 +231,7 @@ export default function BookingSlot() {
           <div className="col-lg-7">
             <div
               className="bg-white shadow-sm"
-              style={{
-                border: "1px solid #ddd",
-              }}
+              style={{ border: "1px solid #ddd" }}
             >
               <div
                 style={{
@@ -308,9 +371,7 @@ export default function BookingSlot() {
           <div className="col-lg-5">
             <div
               className="bg-white shadow-sm p-3"
-              style={{
-                border: "1px solid #ddd",
-              }}
+              style={{ border: "1px solid #ddd" }}
             >
               <div
                 style={{
@@ -360,12 +421,12 @@ export default function BookingSlot() {
                   }}
                 >
                   {cartItems.map((item, index) => {
-                    const qty = Number(item.qty || 1);
+                    const qty = Number(item.qty || item.quantity || 1);
                     const price = Number(item.price || 0);
 
                     return (
                       <div
-                        key={item.service_id || index}
+                        key={item.service_id || item.id || index}
                         className="d-flex justify-content-between mb-2"
                         style={{ fontSize: "15px", color: "#666" }}
                       >
@@ -403,6 +464,7 @@ export default function BookingSlot() {
                 <button
                   className="btn d-block mx-auto"
                   onClick={handleMakePayment}
+                  disabled={loading}
                   style={{
                     background: "green",
                     color: "#fff",
@@ -412,9 +474,10 @@ export default function BookingSlot() {
                     fontSize: "18px",
                     padding: "10px 24px",
                     minWidth: "180px",
+                    opacity: loading ? 0.7 : 1,
                   }}
                 >
-                  Make Payment
+                  {loading ? "Please wait..." : "Make Payment"}
                 </button>
               </div>
             </div>

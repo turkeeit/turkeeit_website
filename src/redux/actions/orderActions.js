@@ -10,8 +10,6 @@ export const getUserOrders = (token) => async (dispatch) => {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    console.log("get orders response", res.data);
-
     dispatch({
       type: "ORDERS_SUCCESS",
       payload: res.data.order_list || [],
@@ -37,8 +35,6 @@ export const getOrderDetails = (orderId) => async (dispatch) => {
         headers: { Authorization: `Bearer ${token}` },
       },
     );
-
-    console.log("order details response", res.data);
 
     dispatch({
       type: "ORDER_DETAILS_SUCCESS",
@@ -77,6 +73,11 @@ export const createOrder = (orderData) => async (dispatch) => {
 
     return res.data;
   } catch (err) {
+    console.error(
+      "createOrder action error",
+      err?.response?.data || err.message,
+    );
+
     dispatch({
       type: "CREATE_ORDER_FAIL",
       payload: err?.response?.data?.error || err.message,
@@ -113,6 +114,11 @@ export const updateOrderStatus = (updateData) => async (dispatch) => {
 
     return res.data;
   } catch (err) {
+    console.error(
+      "updateOrderStatus action error",
+      err?.response?.data || err.message,
+    );
+
     dispatch({
       type: "UPDATE_ORDER_STATUS_FAIL",
       payload: err?.response?.data?.error || err.message,

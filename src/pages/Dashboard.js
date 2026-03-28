@@ -103,7 +103,7 @@ export default function Dashboard() {
     <>
       <Header />
       <div
-        className="container-fluid px-4 px-md-5 mt-2"
+        className="container-fluid py-4 px-md-5 mt-1"
         // style={{
         //   width: "100%",
         //   maxWidth: "1500px",
@@ -124,7 +124,7 @@ export default function Dashboard() {
           <div
             key={index}
             id={getCategoryId(category)}
-            className="mb-5"
+            className="mb-2"
             style={{
               scrollMarginTop: "150px",
               paddingTop: "6px",
@@ -134,10 +134,10 @@ export default function Dashboard() {
             <div
               style={{
                 background: "#f4bf00",
-                padding: "6px 14px",
-                fontWeight: "550",
+                padding: "6px 12px",
+                fontWeight: "600",
                 borderRadius: "6px",
-                fontSize: "22px",
+                fontSize: "18px",
                 display: "inline-block",
                 color: "#3e3d3d",
                 letterSpacing: "0.3px",
@@ -148,13 +148,13 @@ export default function Dashboard() {
 
             {/* SUBCATEGORY */}
             {groupedData[category].map((sub, i) => (
-              <div key={i} className="mt-4">
+              <div key={i} className="mt-3">
                 <h5
                   style={{
                     fontWeight: "600",
-                    fontSize: "22px",
+                    fontSize: "16px",
                     color: "#333",
-                    marginBottom: "18px",
+                    marginBottom: "16px",
                   }}
                 >
                   {sub.subcategory_name}
