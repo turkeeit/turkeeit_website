@@ -519,7 +519,7 @@ export default function OrderDetails() {
                     lineHeight: "1.4",
                   }}
                 >
-                  Address
+                  Delivery Address
                 </div>
                 <div
                   style={{
@@ -615,7 +615,7 @@ export default function OrderDetails() {
                     lineHeight: "1.6",
                   }}
                 >
-                  <span>Platform Fees</span>
+                  <span>Tax</span>
                   <span>₹ {platformFee}</span>
                 </div>
 

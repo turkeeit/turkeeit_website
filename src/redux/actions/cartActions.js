@@ -183,9 +183,40 @@ export const decrementCartItem = (item) => async (dispatch) => {
   }
 };
 
-export const clearCart = () => ({
-  type: "CART_CLEAR",
-});
+export const clearCart = () => async (dispatch) => {
+  try {
+    dispatch({ type: "CART_CLEAR_REQUEST" });
+
+    const token = localStorage.getItem("token");
+    const mobileNumber = localStorage.getItem("mobile_number");
+
+    console.log("CLEAR CART ACTION START");
+    console.log("mobile_number:", mobileNumber);
+
+    const res = await axios.delete(`${HOST}/api/removeAllCartItem`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        mobile_number: mobileNumber,
+      },
+    });
+
+    console.log("CLEAR CART API RESPONSE:", res.data);
+
+    dispatch({ type: "CART_CLEAR" });
+
+    return res.data;
+  } catch (err) {
+    console.log("CLEAR CART ERROR:", err.response?.data || err.message);
+
+    dispatch({
+      type: "CART_CLEAR_FAIL",
+      payload:
+        err.response?.data?.error || err.response?.data?.message || err.message,
+    });
+
+    throw err;
+  }
+};
 
 export const loadUserCart = () => ({
   type: "CART_LOAD_USER_CART",

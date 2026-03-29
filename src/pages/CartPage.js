@@ -38,7 +38,7 @@ export default function CartPage() {
               <div
                 style={{
                   background: "#e6cc6b",
-                  padding: "14px 10px",
+                  padding: "8px 8px",
                   textAlign: "center",
                   fontWeight: "600",
                   fontSize: "20px",

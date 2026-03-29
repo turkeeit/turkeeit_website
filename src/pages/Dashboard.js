@@ -154,7 +154,7 @@ export default function Dashboard() {
                     fontWeight: "600",
                     fontSize: "16px",
                     color: "#333",
-                    marginBottom: "16px",
+                    marginBottom: "6px",
                   }}
                 >
                   {sub.subcategory_name}

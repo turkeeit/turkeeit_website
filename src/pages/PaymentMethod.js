@@ -7,6 +7,7 @@ import {
   getOrderDetails,
 } from "../redux/actions/orderActions";
 import { clearCart } from "../redux/actions/cartActions";
+import { getUserDetails } from "../redux/actions/authActions";
 import { BRAND_NAME, CURRENCY, DESCRIPTION, RAZORPAY_KEY } from "../utils/host";
 
 const FONT_FAMILY = "'Inter', 'Segoe UI', sans-serif";
@@ -19,8 +20,7 @@ export default function PaymentMethod() {
   const { loading, orderDetails, order } = useSelector(
     (state) => state.order || {},
   );
-  const { user } = useSelector((state) => state.userDetails || {});
-  const authUser = useSelector((state) => state.auth?.user || {});
+  const { user } = useSelector((state) => state.auth || {});
 
   const {
     orderId,
@@ -53,7 +53,15 @@ export default function PaymentMethod() {
       .join(", ");
   };
 
-  // ✅ fallback 1: localStorage
+  // user details fetch
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token && !user?.user_id) {
+      dispatch(getUserDetails(token));
+    }
+  }, [dispatch, user?.user_id]);
+
+  // localStorage fallback
   const latestOrderMeta = useMemo(() => {
     try {
       return JSON.parse(localStorage.getItem("latestOrderMeta") || "{}");
@@ -62,7 +70,7 @@ export default function PaymentMethod() {
     }
   }, []);
 
-  // ✅ DB fetch only if needed
+  // DB fetch only if needed
   useEffect(() => {
     const fetchOrderDetailsIfNeeded = async () => {
       if (!orderId) return;
@@ -70,8 +78,9 @@ export default function PaymentMethod() {
       if (
         latestOrderMeta?.orderId === orderId &&
         latestOrderMeta?.razorpayOrderId
-      )
+      ) {
         return;
+      }
 
       try {
         setFetchingRazorpayId(true);
@@ -89,7 +98,7 @@ export default function PaymentMethod() {
     fetchOrderDetailsIfNeeded();
   }, [dispatch, orderId, passedRazorpayOrderId, latestOrderMeta]);
 
-  // ✅ final effective value with all fallbacks
+  // final effective razorpay id
   const effectiveRazorpayOrderId = useMemo(() => {
     return (
       passedRazorpayOrderId ||
@@ -110,12 +119,14 @@ export default function PaymentMethod() {
     console.log("redux order:", order);
     console.log("orderDetails from DB:", orderDetails);
     console.log("effectiveRazorpayOrderId:", effectiveRazorpayOrderId);
+    console.log("auth user:", user);
   }, [
     location.state,
     latestOrderMeta,
     order,
     orderDetails,
     effectiveRazorpayOrderId,
+    user,
   ]);
 
   const handleCODConfirm = async () => {
@@ -225,13 +236,8 @@ export default function PaymentMethod() {
         }
       },
       prefill: {
-        name: user?.name || authUser?.name || "",
-        contact:
-          user?.user_id ||
-          user?.mobile_number ||
-          authUser?.user_id ||
-          authUser?.mobile_number ||
-          "",
+        name: user?.name || "",
+        contact: user?.user_id || user?.mobile_number || "",
       },
       theme: { color: "#f4bf00" },
       modal: {
@@ -379,6 +385,15 @@ export default function PaymentMethod() {
                 </h5>
 
                 <p className="mb-2">
+                  <strong>Customer Name:</strong> {user?.name || "--"}
+                </p>
+
+                <p className="mb-2">
+                  <strong>Mobile:</strong>{" "}
+                  {user?.user_id || user?.mobile_number || "--"}
+                </p>
+
+                <p className="mb-2">
                   <strong>Order ID:</strong> {orderId || "--"}
                 </p>
 
@@ -472,7 +487,7 @@ export default function PaymentMethod() {
                 })}
 
                 <div className="d-flex justify-content-between mb-2">
-                  <span>Platform Fees</span>
+                  <span>Tax</span>
                   <span>₹ {platformFee}</span>
                 </div>
 

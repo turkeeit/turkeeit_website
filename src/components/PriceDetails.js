@@ -38,7 +38,7 @@ export default function PriceDetails({
         ))}
 
         <div className="d-flex justify-content-between mb-2">
-          <span>Platform Fees</span>
+          <span>Tax</span>
           <span>₹ {platformFee}</span>
         </div>
 

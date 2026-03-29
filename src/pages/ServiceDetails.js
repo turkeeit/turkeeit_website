@@ -15,25 +15,35 @@ import ServiceDetailsModal from "../components/ServiceDetailsModal";
 import api from "../api/axiosClient";
 import { useNavigate } from "react-router-dom";
 import { HOST } from "../utils/host";
+import { getUserDetails } from "../redux/actions/authActions";
 
 export default function ServiceDetails() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const { user } = useSelector((state) => state.auth || {});
+
   const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    if (token) {
+      dispatch(getUserDetails(token));
+    }
+  }, [dispatch, token]);
 
   const { selectedServiceId, services, serviceDetails, loading } = useSelector(
     (state) => state.services,
   );
 
-  const cartItems = useSelector((state) => state.cart.items);
+  const cartItems = useSelector((state) => state.cart.items || []);
 
   const [modalService, setModalService] = useState(null);
   const [modalLoading, setModalLoading] = useState(false);
   const [inCart, setInCart] = useState(false);
 
-  // 🔥 LOGIN POPUP STATE
+  // 🔥 POPUP STATES
   const [showLoginPopup, setShowLoginPopup] = useState(false);
+  const [showProfilePopup, setShowProfilePopup] = useState(false);
 
   const serviceId =
     selectedServiceId || localStorage.getItem("selectedServiceId");
@@ -69,10 +79,25 @@ export default function ServiceDetails() {
       return;
     }
 
+    let latestUser = user;
+
+    try {
+      const refreshed = await dispatch(getUserDetails(token));
+      latestUser = refreshed?.payload || user;
+    } catch (error) {
+      console.error("Failed to refresh user details:", error);
+    }
+
+    const isProfileIncomplete =
+      !latestUser?.name?.trim() || !latestUser?.gender?.trim();
+
+    if (isProfileIncomplete) {
+      setShowProfilePopup(true);
+      return;
+    }
+
     try {
       await dispatch(addToCart(item));
-      // ✅ no success popup
-      // cart icon count will update automatically from Redux store
     } catch (error) {
       console.error("Add to cart failed:", error);
       alert("Failed to add to cart");
@@ -171,7 +196,6 @@ export default function ServiceDetails() {
                       fontWeight: "700",
                       marginBottom: "6px",
                       color: "#2b2b2b",
-                      // marginTop: "10px",
                     }}
                   >
                     {serviceDetails?.name}
@@ -545,6 +569,67 @@ export default function ServiceDetails() {
                 onClick={() => setShowLoginPopup(false)}
               >
                 Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🔥 PROFILE INCOMPLETE POPUP */}
+      {showProfilePopup && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            background: "rgba(0,0,0,0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              background: "#fff",
+              padding: "22px",
+              borderRadius: "10px",
+              textAlign: "center",
+              width: "320px",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+            }}
+          >
+            <h6 style={{ fontWeight: "600", marginBottom: "8px" }}>
+              Complete Your Profile
+            </h6>
+
+            <p style={{ fontSize: "13px", color: "#555" }}>
+              Please complete your profile details before adding items to cart.
+            </p>
+
+            <div className="d-flex justify-content-center gap-2 mt-3">
+              <button
+                className="btn btn-sm btn-secondary"
+                onClick={() => setShowProfilePopup(false)}
+              >
+                Cancel
+              </button>
+
+              <button
+                className="btn btn-sm"
+                style={{
+                  background: "#f4bf00",
+                  border: "none",
+                  fontWeight: "600",
+                }}
+                onClick={() => {
+                  setShowProfilePopup(false);
+                  navigate("/user/profile");
+                }}
+              >
+                Go to Profile
               </button>
             </div>
           </div>

@@ -442,7 +442,7 @@ export default function BookingSlot() {
                     className="d-flex justify-content-between mb-2"
                     style={{ fontSize: "15px", color: "#666" }}
                   >
-                    <span>Platform Fees</span>
+                    <span>Tax</span>
                     <span>₹ {platformFee}</span>
                   </div>
 

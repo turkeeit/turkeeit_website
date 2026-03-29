@@ -1,6 +1,9 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Footer() {
+  const navigate = useNavigate();
+
   return (
     <footer
       className="pt-4 pb-2 mt-5"
@@ -41,13 +44,11 @@ export default function Footer() {
                   Careers
                 </a>
               </li>
-              <li>
-                <a
-                  href="#"
-                  style={{ color: "#0A0A0A", textDecoration: "none" }}
-                >
-                  Blog
-                </a>
+              <li
+                onClick={() => navigate("/blogs")}
+                style={{ cursor: "pointer" }}
+              >
+                Blogs
               </li>
             </ul>
           </div>
@@ -115,8 +116,8 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-3">
-          <p className="small mb-0">
+        <div className="mt-2">
+          <p className="small text-center mb-1 ">
             © {new Date().getFullYear()} Turkeeit. All Rights Reserved.
           </p>
         </div>

@@ -406,14 +406,14 @@ export default function Header() {
                   AC Service
                 </button>
               </li>
-              <li className="nav-item ">
+              {/* <li className="nav-item ">
                 <button
                   className="nav-link btn px-4 fw-medium"
                   onClick={() => navigate("/blogs")}
                 >
                   Blogs
                 </button>
-              </li>
+              </li> */}
             </ul>
 
             <div className="d-flex align-items-center gap-3">

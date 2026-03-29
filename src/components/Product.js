@@ -4,7 +4,7 @@ import "./Product.css";
 
 export default function Product({ image, name, price, cutPrice, onClick }) {
   return (
-    <div className="product-grid-item mb-2 px-1 d-flex">
+    <div className="product-grid-item mb-2 px-2 d-flex">
       <div
         className="w-100 d-flex flex-column text-center"
         onClick={onClick}
