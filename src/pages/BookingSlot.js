@@ -16,8 +16,10 @@ export default function BookingSlot() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Available booking time slots shown in UI
   const timeSlots = ["9:00 AM", "11:00 AM", "1:00 PM", "3:00 PM", "5:00 PM"];
 
+  // Returns today's date in YYYY-MM-DD format for input[type="date"]
   const getTodayDate = () => {
     const today = new Date();
     const year = today.getFullYear();
@@ -26,6 +28,7 @@ export default function BookingSlot() {
     return `${year}-${month}-${day}`;
   };
 
+  // Converts a slot like "5:00 PM" to 24-hour parts for date comparisons
   const convertSlotTo24Hour = (slot) => {
     const [time, modifier] = slot.split(" ");
     let [hours, minutes] = time.split(":").map(Number);
@@ -36,6 +39,22 @@ export default function BookingSlot() {
     return { hours, minutes };
   };
 
+  // Converts UI slot like "5:00 PM" to MySQL TIME format "17:00:00"
+  // This is only for API/database payload. UI display remains unchanged.
+  const convertToMySQLTime = (slot) => {
+    if (!slot) return "";
+
+    const [time, modifier] = slot.split(" ");
+    let [hours, minutes] = time.split(":").map(Number);
+
+    if (modifier === "PM" && hours !== 12) hours += 12;
+    if (modifier === "AM" && hours === 12) hours = 0;
+
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00`;
+  };
+
+  // For today's date, auto-select the next available future slot
+  // For future dates, return the first slot
   const getNextAvailableSlot = (date) => {
     const todayStr = getTodayDate();
 
@@ -62,6 +81,7 @@ export default function BookingSlot() {
   const [savedDate, setSavedDate] = useState("");
   const [savedTime, setSavedTime] = useState("");
 
+  // Calculate cart subtotal from items
   const subtotal = useMemo(() => {
     return cartItems.reduce((sum, item) => {
       const price = Number(item.price || 0);
@@ -70,9 +90,11 @@ export default function BookingSlot() {
     }, 0);
   }, [cartItems]);
 
+  // Fixed platform fee/tax as per current project logic
   const platformFee = cartItems.length > 0 ? 100 : 0;
   const total = subtotal + platformFee;
 
+  // Disable past slots only for today
   const isSlotDisabled = (slot) => {
     const todayStr = getTodayDate();
     if (selectedDate !== todayStr) return false;
@@ -85,12 +107,14 @@ export default function BookingSlot() {
     return slotDate <= now;
   };
 
+  // When date changes, auto-pick next valid slot for that date
   const handleDateChange = (e) => {
     const newDate = e.target.value;
     setSelectedDate(newDate);
     setSelectedTime(getNextAvailableSlot(newDate));
   };
 
+  // Save selected slot to state + localStorage for current booking flow
   const handleSave = () => {
     if (!selectedDate || !selectedTime) {
       alert("Please select date and time");
@@ -111,6 +135,7 @@ export default function BookingSlot() {
     alert("Booking slot saved");
   };
 
+  // Reset booking slot selection and clear related temporary localStorage data
   const handleCancel = () => {
     const resetDate = getTodayDate();
     const resetTime = getNextAvailableSlot(resetDate);
@@ -119,10 +144,12 @@ export default function BookingSlot() {
     setSelectedTime(resetTime);
     setSavedDate("");
     setSavedTime("");
+
     localStorage.removeItem("bookingSlot");
-    localStorage.removeItem("latestOrderMeta"); // ✅ added
+    localStorage.removeItem("latestOrderMeta");
   };
 
+  // Converts selected address object into a single backend-friendly string
   const formatAddress = (address) => {
     if (!address) return "";
 
@@ -139,6 +166,7 @@ export default function BookingSlot() {
       .join(", ");
   };
 
+  // Creates order before navigating to payment page
   const handleMakePayment = async () => {
     if (!savedDate || !savedTime) {
       alert("Please save date and time slot first");
@@ -158,11 +186,19 @@ export default function BookingSlot() {
     }
 
     try {
+      // Convert user-friendly time slot into MySQL-compatible TIME format
+      const mysqlServiceTime = convertToMySQLTime(savedTime);
+
+      if (!mysqlServiceTime) {
+        alert("Invalid time slot selected");
+        return;
+      }
+
       const payload = {
         address: formatAddress(selectedAddress),
         total_price: Number(total),
         service_date: savedDate,
-        service_time: savedTime,
+        service_time: mysqlServiceTime,
         cart_items: cartItems.map((item) => ({
           service_id: item.service_id || item.id,
           quantity: Number(item.qty || item.quantity || 1),
@@ -181,9 +217,7 @@ export default function BookingSlot() {
         return;
       }
 
-      // ✅ ADDED:
-      // razorpay_order_id ko localStorage me bhi save kar diya
-      // taki PaymentMethod page par fallback mil sake
+      // Save latest order meta so payment page can use fallback data if needed
       const latestOrderMeta = {
         orderId: response.order_id || null,
         razorpayOrderId: response.razorpay_order_id || null,
@@ -197,7 +231,7 @@ export default function BookingSlot() {
           orderId: response.order_id,
           razorpayOrderId: response.razorpay_order_id || null,
           bookingDate: savedDate,
-          bookingTime: savedTime,
+          bookingTime: savedTime, // Keep original UI format for display
           orderItems: cartItems,
           subtotal,
           platformFee,
