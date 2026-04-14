@@ -33,19 +33,22 @@ export default function MyOrderDetails() {
     }
   };
 
-  const formatDateTime = (date) => {
-    if (!date) return "-";
-    const d = new Date(date);
-    if (isNaN(d)) return date;
+  const formatBookingSlot = (date, time) => {
+    if (!date && !time) return "-";
 
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    const hours = String(d.getHours()).padStart(2, "0");
-    const minutes = String(d.getMinutes()).padStart(2, "0");
-    const seconds = String(d.getSeconds()).padStart(2, "0");
+    let formattedDate = date || "-";
 
-    return `${year}-${month}-${day}, ${hours}:${minutes}:${seconds}`;
+    if (date) {
+      const d = new Date(date);
+      if (!isNaN(d)) {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        formattedDate = `${year}-${month}-${day}`;
+      }
+    }
+
+    return `${formattedDate}${time ? `, ${time}` : ""}`;
   };
 
   const statusObj = getStatusText(orderDetails?.status);
@@ -117,7 +120,10 @@ export default function MyOrderDetails() {
                       marginTop: "2px",
                     }}
                   >
-                    {formatDateTime(orderDetails.created_at)}
+                    {formatBookingSlot(
+                      orderDetails.service_date,
+                      orderDetails.service_time,
+                    )}
                   </div>
 
                   <div

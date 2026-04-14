@@ -49,6 +49,39 @@ export const addToCart = (item) => async (dispatch) => {
   }
 };
 
+// ✅ Fetch cart items from DB after login / refresh
+export const getCartItems = () => async (dispatch) => {
+  try {
+    dispatch({ type: "CART_GET_ITEMS_REQUEST" });
+
+    const token = localStorage.getItem("token");
+    const mobileNumber = localStorage.getItem("mobile_number");
+
+    const res = await axios.get(`${HOST}/api/getCartItem`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        mobile_number: mobileNumber,
+      },
+    });
+
+    dispatch({
+      type: "CART_GET_ITEMS_SUCCESS",
+      payload:
+        res.data.cart_items || res.data.cartItems || res.data.items || [],
+    });
+
+    return res.data;
+  } catch (err) {
+    dispatch({
+      type: "CART_GET_ITEMS_FAIL",
+      payload:
+        err.response?.data?.error || err.response?.data?.message || err.message,
+    });
+
+    throw err;
+  }
+};
+
 export const removeFromCart = (serviceId) => async (dispatch) => {
   try {
     dispatch({ type: "CART_REMOVE_ITEM_REQUEST" });

@@ -12,6 +12,8 @@ import {
   verifyOtp,
 } from "../redux/actions/authActions";
 import "./Header.css";
+// import { getCartItems } from "../redux/actions/cartActions";
+import { loadUserCart } from "../redux/actions/cartActions";
 
 export default function Header() {
   const dispatch = useDispatch();
@@ -57,8 +59,11 @@ export default function Header() {
   }, [dispatch]);
 
   useEffect(() => {
-    if (token && !user) {
-      dispatch(getUserDetails(token));
+    if (token) {
+      if (!user) {
+        dispatch(getUserDetails(token));
+      }
+      dispatch(loadUserCart());
     }
   }, [dispatch, token, user]);
 

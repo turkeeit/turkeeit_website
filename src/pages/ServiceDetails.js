@@ -104,6 +104,48 @@ export default function ServiceDetails() {
     }
   };
 
+  // 🔥 SAFE BUY NOW FUNCTION
+  const handleBuyNow = async () => {
+    if (!token) {
+      setShowLoginPopup(true);
+      return;
+    }
+
+    let latestUser = user;
+
+    try {
+      const refreshed = await dispatch(getUserDetails(token));
+      latestUser = refreshed?.payload || user;
+    } catch (error) {
+      console.error("Failed to refresh user details:", error);
+    }
+
+    const isProfileIncomplete =
+      !latestUser?.name?.trim() || !latestUser?.gender?.trim();
+
+    if (isProfileIncomplete) {
+      setShowProfilePopup(true);
+      return;
+    }
+
+    const buyNowItem = {
+      service_id: serviceDetails?.id,
+      name: serviceDetails?.name,
+      price: Number(serviceDetails?.price),
+      image: serviceDetails?.image_url,
+      image_url: serviceDetails?.image_url,
+      qty: 1,
+      quantity: 1,
+    };
+
+    navigate("/order/details", {
+      state: {
+        buyNow: true,
+        buyNowItem,
+      },
+    });
+  };
+
   const openServiceDetails = async (id) => {
     try {
       setModalLoading(true);
@@ -245,29 +287,7 @@ export default function ServiceDetails() {
                   <div className="d-flex justify-content-center gap-4 mt-4 flex-wrap">
                     <button
                       className="btn"
-                      onClick={() => {
-                        if (!token) {
-                          setShowLoginPopup(true);
-                          return;
-                        }
-
-                        const buyNowItem = {
-                          service_id: serviceDetails?.id,
-                          name: serviceDetails?.name,
-                          price: Number(serviceDetails?.price),
-                          image: serviceDetails?.image_url,
-                          image_url: serviceDetails?.image_url,
-                          qty: 1,
-                          quantity: 1,
-                        };
-
-                        navigate("/order/details", {
-                          state: {
-                            buyNow: true,
-                            buyNowItem,
-                          },
-                        });
-                      }}
+                      onClick={handleBuyNow}
                       style={{
                         minWidth: "98px",
                         padding: "10px 20px",

@@ -81,17 +81,44 @@ export default function BookingSlot() {
   const [savedDate, setSavedDate] = useState("");
   const [savedTime, setSavedTime] = useState("");
 
-  // Calculate cart subtotal from items
+  // Support both cart flow and direct buy now flow
+  const buyNowItems = useMemo(() => {
+    if (
+      Array.isArray(location.state?.orderItems) &&
+      location.state.orderItems.length > 0
+    ) {
+      return location.state.orderItems;
+    }
+
+    if (location.state?.buyNowItem) {
+      return [location.state.buyNowItem];
+    }
+
+    if (location.state?.service) {
+      return [location.state.service];
+    }
+
+    if (location.state?.item) {
+      return [location.state.item];
+    }
+
+    return [];
+  }, [location.state]);
+
+  const finalItems = useMemo(() => {
+    return cartItems.length > 0 ? cartItems : buyNowItems;
+  }, [cartItems, buyNowItems]);
+
+  // Calculate subtotal from final items
   const subtotal = useMemo(() => {
-    return cartItems.reduce((sum, item) => {
+    return finalItems.reduce((sum, item) => {
       const price = Number(item.price || 0);
       const qty = Number(item.qty || item.quantity || 1);
       return sum + price * qty;
     }, 0);
-  }, [cartItems]);
+  }, [finalItems]);
 
-  // Fixed platform fee/tax as per current project logic
-  const platformFee = cartItems.length > 0 ? 100 : 0;
+  const platformFee = finalItems.length > 0 ? 100 : 0;
   const total = subtotal + platformFee;
 
   // Disable past slots only for today
@@ -166,6 +193,29 @@ export default function BookingSlot() {
       .join(", ");
   };
 
+  // Read already-created pending order meta from localStorage
+  const getStoredLatestOrderMeta = () => {
+    try {
+      const raw = localStorage.getItem("latestOrderMeta");
+      return raw ? JSON.parse(raw) : null;
+    } catch (error) {
+      console.error("Failed to parse latestOrderMeta:", error);
+      return null;
+    }
+  };
+
+  // Get existing pending order id if already created earlier in same flow
+  const getExistingPendingOrderId = () => {
+    const stateOrderId =
+      location.state?.orderId || location.state?.pendingOrderId;
+    if (stateOrderId) return stateOrderId;
+
+    const latestOrderMeta = getStoredLatestOrderMeta();
+    if (latestOrderMeta?.orderId) return latestOrderMeta.orderId;
+
+    return null;
+  };
+
   // Creates order before navigating to payment page
   const handleMakePayment = async () => {
     if (!savedDate || !savedTime) {
@@ -180,13 +230,12 @@ export default function BookingSlot() {
       return;
     }
 
-    if (!cartItems.length) {
-      alert("No items found in cart");
+    if (!finalItems.length) {
+      alert("No items found for booking");
       return;
     }
 
     try {
-      // Convert user-friendly time slot into MySQL-compatible TIME format
       const mysqlServiceTime = convertToMySQLTime(savedTime);
 
       if (!mysqlServiceTime) {
@@ -194,18 +243,22 @@ export default function BookingSlot() {
         return;
       }
 
+      const existingOrderId = getExistingPendingOrderId();
+
       const payload = {
+        ...(existingOrderId && { order_id: existingOrderId }),
         address: formatAddress(selectedAddress),
         total_price: Number(total),
         service_date: savedDate,
         service_time: mysqlServiceTime,
-        cart_items: cartItems.map((item) => ({
+        cart_items: finalItems.map((item) => ({
           service_id: item.service_id || item.id,
           quantity: Number(item.qty || item.quantity || 1),
           price: Number(item.price || 0),
         })),
       };
 
+      console.log("existing pending order id:", existingOrderId);
       console.log("createOrder payload:", payload);
 
       const response = await dispatch(createOrder(payload));
@@ -217,9 +270,8 @@ export default function BookingSlot() {
         return;
       }
 
-      // Save latest order meta so payment page can use fallback data if needed
       const latestOrderMeta = {
-        orderId: response.order_id || null,
+        orderId: response.order_id || existingOrderId || null,
         razorpayOrderId: response.razorpay_order_id || null,
       };
 
@@ -228,17 +280,18 @@ export default function BookingSlot() {
 
       navigate("/payment-method", {
         state: {
-          orderId: response.order_id,
+          orderId: response.order_id || existingOrderId,
           razorpayOrderId: response.razorpay_order_id || null,
           bookingDate: savedDate,
-          bookingTime: savedTime, // Keep original UI format for display
-          orderItems: cartItems,
+          bookingTime: savedTime,
+          orderItems: finalItems,
           subtotal,
           platformFee,
           total,
           selectedAddress,
           userName: user?.name || "User",
           user_id: user?.user_id || "",
+          isBuyNow: cartItems.length === 0,
         },
       });
     } catch (error) {
@@ -454,7 +507,7 @@ export default function BookingSlot() {
                     marginBottom: "24px",
                   }}
                 >
-                  {cartItems.map((item, index) => {
+                  {finalItems.map((item, index) => {
                     const qty = Number(item.qty || item.quantity || 1);
                     const price = Number(item.price || 0);
 

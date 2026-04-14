@@ -7,6 +7,7 @@ export const sendOtp = (mobile) => async (dispatch) => {
     dispatch({ type: "SEND_OTP_REQUEST" });
     console.log("Sending OTP to mobile number:", mobile);
     console.log(`${HOST}/api/sendOtp`);
+
     await api.post(
       `${HOST}/api/sendOtp`,
       {},
@@ -16,6 +17,7 @@ export const sendOtp = (mobile) => async (dispatch) => {
         },
       },
     );
+
     dispatch({ type: "SEND_OTP_SUCCESS" });
   } catch (error) {
     dispatch({
@@ -28,6 +30,7 @@ export const sendOtp = (mobile) => async (dispatch) => {
 // Verify OTP
 export const verifyOtp = (mobile, otp) => {
   console.log(mobile, otp);
+
   return async (dispatch) => {
     try {
       const res = await api.post(
@@ -40,18 +43,29 @@ export const verifyOtp = (mobile, otp) => {
           },
         },
       );
+
       localStorage.setItem("token", res.data.token);
+      localStorage.setItem("mobile_number", mobile); // ✅ important for cart/profile restore
+
       console.log("OTP verified, token received:", res.data.token);
-      dispatch({ type: "VERIFY_OTP_SUCCESS", payload: res.data.token });
+
+      dispatch({
+        type: "VERIFY_OTP_SUCCESS",
+        payload: res.data.token,
+      });
     } catch (err) {
-      dispatch({ type: "API_ERROR", payload: err.message });
+      dispatch({
+        type: "API_ERROR",
+        payload: err.response?.data?.message || err.message,
+      });
     }
   };
 };
 
-// Verify OTP
+// Get User Details
 export const getUserDetails = (token) => {
   console.log("get user details with token:", token);
+
   return async (dispatch) => {
     try {
       const res = await api.get(`${HOST}/api/getUserDetails`, {
@@ -59,42 +73,59 @@ export const getUserDetails = (token) => {
           Authorization: `Bearer ${token}`,
         },
       });
+
       localStorage.setItem("user", JSON.stringify(res.data.user));
-      console.log("OTP verified, user received:", res.data.user);
-      dispatch({ type: "GET_USER_DETAILS_SUCCESS", payload: res.data });
+      console.log("User received:", res.data.user);
+
+      dispatch({
+        type: "GET_USER_DETAILS_SUCCESS",
+        payload: res.data,
+      });
     } catch (err) {
-      dispatch({ type: "GET_USER_DETAILS_FAIL", payload: err.message });
+      dispatch({
+        type: "GET_USER_DETAILS_FAIL",
+        payload: err.response?.data?.message || err.message,
+      });
     }
   };
 };
 
+// Restore login from localStorage
 export const checkAlreadyLoggedIn = () => (dispatch) => {
   const token = localStorage.getItem("token");
-  const user = localStorage.getItem("user");
+  const savedUser = localStorage.getItem("user");
+
+  let parsedUser = null;
+
+  try {
+    parsedUser = savedUser ? JSON.parse(savedUser) : null;
+  } catch (error) {
+    parsedUser = null;
+  }
 
   if (token) {
     dispatch({
       type: "LOGIN_RESTORE",
       payload: {
         token,
-        user: user ? user : null,
+        user: parsedUser,
       },
     });
   }
 };
 
-//logout
+// Logout
 export const logout = () => (dispatch) => {
-  // Clear storage
   localStorage.removeItem("token");
   localStorage.removeItem("user");
-  // localStorage.removeItem("mobile_number"); // ✅ important
+  localStorage.removeItem("mobile_number"); // ✅ clear mobile also
 
   dispatch({ type: "LOGOUT" });
 };
 
 export const updateUserProfile = (profileData) => async (dispatch) => {
   console.log("Updating user profile with data:", profileData);
+
   try {
     dispatch({ type: "UPDATE_PROFILE_REQUEST" });
 
@@ -111,7 +142,9 @@ export const updateUserProfile = (profileData) => async (dispatch) => {
     );
 
     console.log("Update Profile Response Data:", data);
+
     dispatch(getUserDetails(token));
+
     dispatch({
       type: "UPDATE_PROFILE_SUCCESS",
       payload: data.user,
