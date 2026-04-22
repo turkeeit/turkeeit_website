@@ -3,6 +3,7 @@ import {
   BrowserRouter as Router,
   Routes,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import "./App.css";
 import Login from "./pages/Login";
@@ -20,10 +21,25 @@ import PaymentMethod from "./pages/PaymentMethod";
 import OrderConfirmed from "./pages/OrderConfirmed";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentFailure from "./pages/PaymentFailure";
+import AdminLayout from "./admin/components/AdminLayout";
+import AdminHome from "./admin/pages/AdminHome";
+import UsersPage from "./admin/pages/UsersPage";
+import CategoryPage from "./admin/pages/CategoryPage";
+import SubcategoryPage from "./admin/pages/SubcategoryPage";
+import ServicesPage from "./admin/pages/ServicesPage";
+import OrdersPage from "./admin/pages/OrdersPage";
+import PartnersPage from "./admin/pages/PartnersPage";
+import PartnerOrdersPage from "./admin/pages/PartnerOrdersPage";
+import PayoutPage from "./admin/pages/PayoutPage";
 
 function App() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith(
+    "/admin/turkeeit/dashboard",
+  );
+
   return (
-    <div className="page-wrapper">
+    <div className={isAdminRoute ? "" : "page-wrapper"}>
       <Routes>
         <Route path="/" element={<Navigate to="/services" replace />} />
         <Route path="/login" element={<Login />} />
@@ -45,6 +61,19 @@ function App() {
         <Route path="/order-confirmed" element={<OrderConfirmed />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/payment-failure" element={<PaymentFailure />} />
+
+        {/* ✅ NEW ADMIN ROUTES */}
+        <Route path="/admin/turkeeit/dashboard" element={<AdminLayout />}>
+          <Route index element={<AdminHome />} />
+          <Route path="users" element={<UsersPage />} />
+          <Route path="category" element={<CategoryPage />} />
+          <Route path="subcategory" element={<SubcategoryPage />} />
+          <Route path="services" element={<ServicesPage />} />
+          <Route path="orders" element={<OrdersPage />} />
+          <Route path="partners" element={<PartnersPage />} />
+          <Route path="partner-orders" element={<PartnerOrdersPage />} />
+          <Route path="payout" element={<PayoutPage />} />
+        </Route>
       </Routes>
     </div>
   );
