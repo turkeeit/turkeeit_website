@@ -23,6 +23,9 @@ export default function PayoutPage() {
   const [markingPaid, setMarkingPaid] = useState(false);
   const [viewLoading, setViewLoading] = useState(false);
 
+  const [eligiblePartnerOrders, setEligiblePartnerOrders] = useState([]);
+  const [eligibleOrdersLoading, setEligibleOrdersLoading] = useState(false);
+
   // ================= FETCH PAYOUTS =================
   const fetchPayouts = async () => {
     try {
@@ -45,6 +48,45 @@ export default function PayoutPage() {
   useEffect(() => {
     fetchPayouts();
   }, []);
+
+  // ================= FETCH ELIGIBLE PARTNER ORDERS =================
+  const fetchEligiblePartnerOrders = async () => {
+    try {
+      setEligibleOrdersLoading(true);
+
+      const response = await fetch(API.GET_ALL_PARTNER_ORDERS);
+      const data = await response.json();
+
+      console.log("Partner orders API response:", data);
+
+      const allPartnerOrders =
+        data.partner_orders || data.orders || data.data || [];
+
+      const createdPayoutPartnerOrderIds = new Set(
+        (payouts || []).map((item) => String(item.partner_order_id || "")),
+      );
+
+      const filteredOrders = allPartnerOrders.filter((item) => {
+        const orderStatus = String(item.order_status || "").toLowerCase();
+        const paymentStatus = String(item.payment_status || "").toLowerCase();
+        const partnerOrderId = String(item.partner_order_id || item.id || "");
+
+        return (
+          partnerOrderId &&
+          orderStatus === "completed" &&
+          paymentStatus === "paid" &&
+          !createdPayoutPartnerOrderIds.has(partnerOrderId)
+        );
+      });
+
+      setEligiblePartnerOrders(filteredOrders);
+    } catch (error) {
+      console.error("Error fetching eligible partner orders:", error);
+      setEligiblePartnerOrders([]);
+    } finally {
+      setEligibleOrdersLoading(false);
+    }
+  };
 
   // ================= HELPERS =================
   const formatText = (value) => {
@@ -83,8 +125,9 @@ export default function PayoutPage() {
   };
 
   // ================= OPEN MODALS =================
-  const handleCreateOpen = () => {
+  const handleCreateOpen = async () => {
     setCreateForm(getEmptyCreateForm());
+    await fetchEligiblePartnerOrders();
   };
 
   const handleView = async (payout) => {
@@ -159,6 +202,7 @@ export default function PayoutPage() {
       await fetchPayouts();
 
       setCreateForm(getEmptyCreateForm());
+      setEligiblePartnerOrders([]);
 
       document.getElementById("closeCreatePayoutModalBtn").click();
 
@@ -353,9 +397,8 @@ export default function PayoutPage() {
               <div className="modal-body">
                 <div className="mb-3">
                   <label className="form-label">Partner Order ID</label>
-                  <input
-                    type="text"
-                    className="form-control"
+                  <select
+                    className="form-select"
                     value={createForm.partner_order_id}
                     onChange={(e) =>
                       setCreateForm((prev) => ({
@@ -363,9 +406,36 @@ export default function PayoutPage() {
                         partner_order_id: e.target.value,
                       }))
                     }
-                    placeholder="Enter partner order id"
                     required
-                  />
+                    disabled={eligibleOrdersLoading}
+                  >
+                    <option value="">
+                      {eligibleOrdersLoading
+                        ? "Loading eligible partner orders..."
+                        : "Select partner order id"}
+                    </option>
+
+                    {eligiblePartnerOrders.map((order) => (
+                      <option
+                        key={order.partner_order_id || order.id}
+                        value={order.partner_order_id || order.id}
+                      >
+                        {(order.partner_order_id || order.id) +
+                          " - " +
+                          formatText(order.service_name) +
+                          " - ₹" +
+                          formatText(order.partner_earning)}
+                      </option>
+                    ))}
+                  </select>
+
+                  {!eligibleOrdersLoading &&
+                    eligiblePartnerOrders.length === 0 && (
+                      <div className="form-text text-danger mt-2">
+                        No eligible partner orders found. Only completed and
+                        paid partner orders without payout are shown here.
+                      </div>
+                    )}
                 </div>
               </div>
 
@@ -382,7 +452,7 @@ export default function PayoutPage() {
                 <button
                   type="submit"
                   className="btn btn-primary"
-                  disabled={creating}
+                  disabled={creating || eligiblePartnerOrders.length === 0}
                 >
                   {creating ? "Creating..." : "Create Payout"}
                 </button>

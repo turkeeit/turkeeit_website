@@ -169,7 +169,7 @@ export default function OrdersPage() {
                   <th>ID</th>
                   <th>Order ID</th>
                   <th>User ID</th>
-                  <th>Status</th>
+                  <th>Order Status</th>
                   <th>Total Price</th>
                   <th>Payment Status</th>
                   <th>Service Date</th>

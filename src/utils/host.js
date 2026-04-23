@@ -33,6 +33,12 @@ export const API = {
   DELETE_SERVICE: `${HOST}/api/admin/removeService`,
   GET_SERVICE_DETAILS: `${HOST}/api/admin/getServiceDetails`,
 
+  // service addons
+  GET_ALL_SERVICE_ADDONS: `${HOST}/api/admin/service-addon/list`,
+  GET_SERVICE_ADDONS_BY_MAIN_SERVICE: `${HOST}/api/admin/service-addon/by-main-service`,
+  ADD_SERVICE_ADDON: `${HOST}/api/admin/service-addon/add`,
+  DELETE_SERVICE_ADDON: `${HOST}/api/admin/service-addon/remove`,
+
   // orders
   GET_ALL_ORDERS: `${HOST}/api/admin/getAllOrders`,
   GET_ORDER_DETAILS: `${HOST}/api/admin/getOrderDetails`,
@@ -51,8 +57,8 @@ export const API = {
   DELETE_PARTNER_ORDER: `${HOST}/api/admin/partner/removePartnerOrder`,
 
   // payouts
-  CREATE_PAYOUT: `${HOST}/admin/payout/create`,
-  GET_ALL_PAYOUTS: `${HOST}/admin/payout/list`,
-  GET_PAYOUT_DETAILS: `${HOST}/admin/payout/details`,
-  MARK_PAYOUT_PAID: `${HOST}/admin/payout/markPaid`,
+  CREATE_PAYOUT: `${HOST}/api/admin/payout/create`,
+  GET_ALL_PAYOUTS: `${HOST}/api/admin/payout/list`,
+  GET_PAYOUT_DETAILS: `${HOST}/api/admin/payout/details`,
+  MARK_PAYOUT_PAID: `${HOST}/api/admin/payout/markPaid`,
 };

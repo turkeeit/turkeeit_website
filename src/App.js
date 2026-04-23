@@ -31,6 +31,7 @@ import OrdersPage from "./admin/pages/OrdersPage";
 import PartnersPage from "./admin/pages/PartnersPage";
 import PartnerOrdersPage from "./admin/pages/PartnerOrdersPage";
 import PayoutPage from "./admin/pages/PayoutPage";
+import ServiceAddonsPage from "./admin/pages/ServiceAddonsPage";
 
 function App() {
   const location = useLocation();
@@ -69,6 +70,7 @@ function App() {
           <Route path="category" element={<CategoryPage />} />
           <Route path="subcategory" element={<SubcategoryPage />} />
           <Route path="services" element={<ServicesPage />} />
+          <Route path="service-addons" element={<ServiceAddonsPage />} />
           <Route path="orders" element={<OrdersPage />} />
           <Route path="partners" element={<PartnersPage />} />
           <Route path="partner-orders" element={<PartnerOrdersPage />} />

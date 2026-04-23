@@ -37,6 +37,13 @@ export default function Sidebar() {
           Services
         </NavLink>
 
+        <NavLink
+          to="/admin/turkeeit/dashboard/service-addons"
+          className={linkClass}
+        >
+          Service Addons
+        </NavLink>
+
         <NavLink to="/admin/turkeeit/dashboard/orders" className={linkClass}>
           Order List
         </NavLink>
