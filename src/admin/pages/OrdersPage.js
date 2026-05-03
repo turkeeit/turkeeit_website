@@ -86,6 +86,17 @@ export default function OrdersPage() {
     });
   };
 
+  const isPartnerAssigned = (order) => {
+    return (
+      order.status === "assigned" ||
+      order.status === "accepted" ||
+      order.status === "in_progress" ||
+      order.status === "completed" ||
+      order.partner_id ||
+      order.partner_order_id
+    );
+  };
+
   // ================= VIEW ORDER =================
   const handleView = (order) => {
     setSelectedOrder(order);
@@ -149,6 +160,35 @@ export default function OrdersPage() {
     }
   };
 
+  const getStatusClass = (status) => {
+    switch (status) {
+      case "rejected":
+        return "text-danger fw-semibold"; // 🔴 Red
+      case "completed":
+        return "text-success fw-semibold"; // 🟢 Green
+      case "in_progress":
+        return "text-primary fw-semibold"; // 🔵 Blue
+      case "assigned":
+      case "accepted":
+        return "text-warning fw-semibold"; // 🟡 Yellow
+      case "pending":
+        return "text-secondary fw-semibold"; // ⚪ Gray
+      default:
+        return "";
+    }
+  };
+
+  const getPaymentStatusClass = (status) => {
+    switch (status) {
+      case "paid":
+        return "text-success fw-semibold"; // Green
+      case "pending":
+        return "text-danger fw-semibold"; // Red
+      default:
+        return "text-secondary";
+    }
+  };
+
   return (
     <div>
       {/* HEADER */}
@@ -196,9 +236,15 @@ export default function OrdersPage() {
                       <td>{order.id}</td>
                       <td>{order.order_id}</td>
                       <td>{order.user_id}</td>
-                      <td>{formatText(order.status)}</td>
+                      <td className={getStatusClass(order.status)}>
+                        {formatText(order.status)}
+                      </td>
                       <td>{formatText(order.total_price)}</td>
-                      <td>{formatText(order.payment_status)}</td>
+                      <td
+                        className={getPaymentStatusClass(order.payment_status)}
+                      >
+                        {formatText(order.payment_status)}
+                      </td>
                       <td>{formatDate(order.service_date)}</td>
                       <td>
                         <div className="d-flex gap-2">
@@ -212,7 +258,7 @@ export default function OrdersPage() {
                             View
                           </button>
 
-                          {order.status === "assigned" ? (
+                          {isPartnerAssigned(order) ? (
                             <button
                               type="button"
                               className="btn btn-sm btn-success"
