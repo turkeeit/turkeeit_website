@@ -1,4 +1,4 @@
-export const HOST = "https://turkeeit.info";
+export const HOST = "https://turkeeit.com";
 // export const HOST = "http://localhost:5000";
 export const RAZORPAY_KEY = "rzp_test_ZUC1pptTxiGooR";
 export const CURRENCY = "INR";
