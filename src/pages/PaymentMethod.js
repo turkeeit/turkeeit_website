@@ -310,7 +310,7 @@ export default function PaymentMethod() {
   return (
     <>
       <Header />
-
+      <div className="header-spacing"></div>
       <div className="container mt-4 mb-4" style={{ fontFamily: FONT_FAMILY }}>
         <div className="row g-4">
           <div className="col-lg-7">

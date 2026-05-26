@@ -175,6 +175,7 @@ export default function ServiceDetails() {
   return (
     <>
       <Header />
+      <div className="header-spacing"></div>
       <ServiceDetailsModal service={modalService} loading={modalLoading} />
 
       <div

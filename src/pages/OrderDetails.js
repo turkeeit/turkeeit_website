@@ -257,7 +257,7 @@ export default function OrderDetails() {
   return (
     <>
       <Header />
-
+      <div className="header-spacing"></div>
       <div className="container mt-4" style={{ fontFamily: FONT_FAMILY }}>
         <div className="row">
           <div className="col-lg-7 mb-4">

@@ -13,7 +13,7 @@ export default function PaymentSuccess() {
   return (
     <>
       <Header />
-
+      <div className="header-spacing"></div>
       <div className="container mt-5" style={{ fontFamily: FONT_FAMILY }}>
         <div className="row justify-content-center">
           <div className="col-md-6">
@@ -55,9 +55,9 @@ export default function PaymentSuccess() {
                 <strong>Total:</strong> ₹ {total}
               </p>
 
-              <div className="d-flex justify-content-center gap-3">
+              <div className="d-flex flex-column flex-sm-row justify-content-center gap-3">
                 <button
-                  className="btn"
+                  className="btn w-100 w-sm-auto"
                   onClick={() => navigate("/")}
                   style={{
                     background: "#f4bf00",
@@ -71,7 +71,7 @@ export default function PaymentSuccess() {
                 </button>
 
                 <button
-                  className="btn btn-outline-dark"
+                  className="btn btn-outline-dark w-100 w-sm-auto"
                   onClick={() => navigate("/user/orders")}
                   style={{
                     borderRadius: "8px",

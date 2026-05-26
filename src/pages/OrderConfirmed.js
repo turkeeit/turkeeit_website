@@ -13,7 +13,7 @@ export default function OrderConfirmed() {
   return (
     <>
       <Header />
-
+      <div className="header-spacing"></div>
       <div className="container mt-5" style={{ fontFamily: FONT_FAMILY }}>
         <div className="row justify-content-center">
           <div className="col-md-6">

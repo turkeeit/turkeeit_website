@@ -306,7 +306,7 @@ export default function BookingSlot() {
   return (
     <>
       <Header />
-
+      <div className="header-spacing"></div>
       <div
         className="container mb-4"
         style={{
@@ -418,9 +418,9 @@ export default function BookingSlot() {
                   </p>
                 )}
 
-                <div className="d-flex justify-content-center gap-4 mt-5">
+                <div className="d-flex flex-column flex-sm-row justify-content-center align-items-center gap-3 mt-5">
                   <button
-                    className="btn"
+                    className="btn w-100 w-sm-auto"
                     onClick={handleCancel}
                     style={{
                       minWidth: "160px",
@@ -436,7 +436,7 @@ export default function BookingSlot() {
                   </button>
 
                   <button
-                    className="btn"
+                    className="btn w-100 w-sm-auto"
                     onClick={handleSave}
                     style={{
                       minWidth: "160px",

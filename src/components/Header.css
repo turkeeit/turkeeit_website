@@ -9,7 +9,7 @@
 .logo {
   font-size: 22px;
   font-weight: bold;
-  color: #ffc E1B;
+  color: #ffc500;
 }
 
 .nav {
@@ -31,64 +31,443 @@
   border-radius: 5px;
 }
 
-/* Search button hover effect */
+/* =======================================================
+   BUTTONS
+======================================================= */
+
 .btn-search {
   background-color: #6c757d;
   color: #ede7e7;
   border: none;
   transition: all 0.3s;
 }
+
 .btn-search:hover {
-  background-color: #5a6268; /* Slightly darker on hover */
-  color: #ffffff; /* text turns white on hover */
+  background-color: #5a6268;
+  color: #ffffff;
   cursor: pointer;
 }
 
-/* Sign In button hover effect */
 .btn-signin {
   background-color: #ffffff;
   border: 1.5px solid #535151;
   color: #201f1f;
   transition: all 0.3s;
 }
+
 .btn-signin:hover {
-  background-color: #6c757d; /* Dark background on hover */
-  color: #fbfaf8; /* Text changes to yellow (magnetic) */
+  background-color: #6c757d;
+  color: #fbfaf8;
   cursor: pointer;
 }
 
-/* Get OTP button */
-.btn-otp {
-  background-color: #ffc500; /* Yellow background */
-  color: black; /* Magnetic black text */
-  border: none;
-  font-weight: bold;
-  transition:
-    background-color 0.3s ease,
-    box-shadow 0.3s ease; /* Smooth transition */
-}
-
-.btn-otp:hover {
-  background-color: #e6b800; /* Slightly darker yellow on hover */
-  color: black;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Subtle shadow for lift effect */
-  cursor: pointer;
-}
-
-/* Verify OTP button */
+.btn-otp,
 .btn-verify {
-  background-color: #ffc500; /* Yellow background */
-  color: black; /* Magnetic black text */
+  background-color: #ffc500;
+  color: black;
   border: none;
   font-weight: bold;
   transition:
     background-color 0.3s ease,
-    box-shadow 0.3s ease; /* Smooth transition */
+    box-shadow 0.3s ease;
 }
 
+.btn-otp:hover,
 .btn-verify:hover {
-  background-color: #e6b800; /* Slightly darker yellow on hover */
+  background-color: #e6b800;
   color: black;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Subtle shadow for lift effect */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   cursor: pointer;
+}
+
+/* =======================================================
+   HEADER MAIN
+======================================================= */
+
+.header-main-container {
+  min-height: 75px;
+  transition: all 0.3s ease;
+}
+
+.header-logo-section img {
+  transition: all 0.3s ease;
+}
+
+.header-search-wrapper {
+  width: 75%;
+  transition: all 0.3s ease;
+}
+
+.header-search-wrapper input:focus {
+  box-shadow: none;
+  border-color: #000;
+}
+
+.header-search-wrapper button:hover {
+  background: #333 !important;
+}
+
+.header-right-section {
+  transition: all 0.3s ease;
+}
+
+/* =======================================================
+   CATEGORY NAVBAR
+======================================================= */
+
+.category-navbar {
+  min-height: auto;
+  padding: 10px 0;
+  background: #fff;
+}
+
+.category-nav-list {
+  flex-wrap: wrap;
+}
+
+.category-nav-list .nav-link {
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.category-nav-list .nav-link:hover {
+  background: #f4f4f4;
+}
+
+/* =======================================================
+   CONTACT SECTION
+======================================================= */
+
+.header-contact-section {
+  transition: all 0.3s ease;
+}
+
+/* =======================================================
+   HEADER SPACING
+======================================================= */
+
+.header-spacing {
+  height: 10px;
+}
+
+/* =======================================================
+   LARGE DESKTOP
+======================================================= */
+
+@media (max-width: 1400px) {
+  .header-search-wrapper {
+    width: 90%;
+  }
+
+  .header-spacing {
+    height: 10px;
+  }
+}
+
+/* =======================================================
+   DESKTOP
+======================================================= */
+
+@media (max-width: 1200px) {
+  .header-search-wrapper {
+    width: 100%;
+  }
+
+  .header-logo-section span {
+    font-size: 18px !important;
+  }
+
+  .header-right-section {
+    gap: 12px !important;
+  }
+
+  .category-nav-list .nav-link {
+    font-size: 14px;
+    padding: 8px 14px !important;
+  }
+
+  .header-spacing {
+    height: 20px;
+  }
+}
+
+/* =======================================================
+   TABLET LANDSCAPE
+======================================================= */
+
+@media (max-width: 992px) {
+  .header-main-container {
+    flex-wrap: wrap;
+    padding: 12px !important;
+    gap: 12px;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* LOGO LEFT */
+
+  .header-logo-section {
+    width: auto !important;
+    justify-content: flex-start;
+    align-items: center;
+    text-align: left;
+  }
+
+  /* RIGHT SECTION */
+
+  .header-right-section {
+    width: auto !important;
+    justify-content: flex-end !important;
+    align-items: center;
+    gap: 14px !important;
+  }
+
+  /* SEARCH */
+
+  .header-search-section {
+    width: 100% !important;
+    order: 3;
+    margin-top: 8px;
+  }
+
+  .header-search-wrapper {
+    width: 100%;
+  }
+
+  /* CONTACT */
+
+  .header-contact-section {
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    gap: 18px !important;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  /* CATEGORY */
+
+  .category-navbar .container-fluid {
+    flex-direction: column;
+    gap: 12px;
+    padding: 10px;
+  }
+
+  .category-nav-list {
+    justify-content: center;
+  }
+
+  /* SPACING */
+
+  .header-spacing {
+    height: 150px;
+  }
+}
+
+/* =======================================================
+   TABLET PORTRAIT / MOBILE
+======================================================= */
+
+@media (max-width: 768px) {
+  /* YELLOW HEADER */
+
+  .navbar.shadow-sm {
+    height: auto !important;
+    padding: 12px 0 !important;
+  }
+
+  .header-main-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px !important;
+    gap: 12px;
+  }
+
+  /* LOGO LEFT */
+
+  .header-logo-section {
+    width: auto !important;
+    display: flex;
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .header-logo-section img {
+    height: 42px !important;
+  }
+
+  .header-logo-section span {
+    font-size: 18px !important;
+    margin-left: 10px !important;
+    margin-top: 0 !important;
+    font-weight: 600;
+  }
+
+  /* CART + PROFILE RIGHT */
+
+  .header-right-section {
+    width: auto !important;
+    display: flex;
+    justify-content: flex-end !important;
+    align-items: center;
+    gap: 14px !important;
+  }
+
+  /* SEARCH SECTION */
+
+  .header-search-section {
+    width: 100% !important;
+    order: 3;
+    margin-top: 8px;
+  }
+
+  .header-search-wrapper {
+    width: 100% !important;
+    display: flex;
+    flex-direction: row !important;
+    gap: 10px;
+  }
+
+  .header-search-wrapper input {
+    flex: 1;
+    height: 44px !important;
+    font-size: 14px !important;
+    border-radius: 8px !important;
+  }
+
+  .header-search-wrapper button {
+    width: 120px;
+    height: 44px !important;
+    font-size: 14px !important;
+    border-radius: 8px !important;
+    padding: 0 14px !important;
+  }
+
+  /* CONTACT */
+
+  .header-contact-section {
+    width: 100%;
+    display: flex;
+    flex-direction: row !important;
+    justify-content: center;
+    align-items: center;
+    gap: 20px !important;
+    margin-top: 18px;
+    padding-bottom: 6px;
+  }
+
+  .header-contact-section a {
+    font-size: 14px !important;
+  }
+
+  /* CATEGORY */
+
+  .category-navbar .container-fluid {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .category-nav-list {
+    justify-content: center;
+    gap: 6px !important;
+  }
+
+  .category-nav-list .nav-link {
+    font-size: 13px;
+    padding: 6px 12px !important;
+  }
+
+  /* CONTENT SPACING */
+
+  .header-spacing {
+    height: 120px;
+  }
+}
+
+/* =======================================================
+   MOBILE
+======================================================= */
+
+@media (max-width: 576px) {
+  .header-main-container {
+    padding: 10px !important;
+  }
+
+  /* LOGO */
+
+  .header-logo-section img {
+    height: 38px !important;
+  }
+
+  .header-logo-section span {
+    font-size: 16px !important;
+  }
+
+  /* SEARCH */
+
+  .header-search-wrapper {
+    flex-direction: column !important;
+    gap: 8px;
+  }
+
+  .header-search-wrapper button {
+    width: 100%;
+  }
+
+  /* CONTACT */
+
+  .header-contact-section {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  /* SPACING */
+
+  .header-spacing {
+    height: 170px;
+  }
+}
+
+/* =======================================================
+   SMALL MOBILE
+======================================================= */
+
+@media (max-width: 400px) {
+  .header-logo-section img {
+    height: 34px !important;
+  }
+
+  .header-logo-section span {
+    font-size: 14px !important;
+  }
+
+  .header-search-wrapper input {
+    font-size: 12px !important;
+  }
+
+  .header-search-wrapper button {
+    font-size: 12px !important;
+    height: 36px !important;
+  }
+
+  .category-nav-list .nav-link {
+    font-size: 11px;
+    padding: 5px 8px !important;
+  }
+
+  .header-contact-section a {
+    font-size: 14px !important;
+  }
+
+  .header-spacing {
+    height: 150px;
+  }
 }

@@ -56,7 +56,7 @@ export default function MyOrderDetails() {
   return (
     <>
       <Header />
-
+      <div className="header-spacing"></div>
       <div
         style={{
           background: "#f5f5f5",

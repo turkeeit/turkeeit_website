@@ -173,6 +173,7 @@ export default function Header() {
   return (
     <>
       <div
+        className="main-fixed-header"
         style={{
           position: "fixed",
           top: 0,
@@ -190,8 +191,8 @@ export default function Header() {
             height: "75px",
           }}
         >
-          <div className="container-fluid d-flex align-items-center px-4">
-            <div className="col-3 d-flex align-items-center">
+          <div className="container-fluid d-flex align-items-center px-4 header-main-container">
+            <div className="col-3 d-flex align-items-center header-logo-section">
               <img
                 src={logo}
                 alt="Turkeeit"
@@ -215,8 +216,8 @@ export default function Header() {
               </span>
             </div>
 
-            <div className="col-6 d-flex justify-content-center align-items-center">
-              <div className="d-flex w-75">
+            <div className="col-6 d-flex justify-content-center align-items-center header-search-section">
+              <div className="d-flex w-75 header-search-wrapper">
                 <input
                   className="form-control"
                   placeholder="Search services..."
@@ -247,7 +248,7 @@ export default function Header() {
               </div>
             </div>
 
-            <div className="col-3 d-flex justify-content-end align-items-center gap-3">
+            <div className="col-3 d-flex justify-content-end align-items-center gap-3 header-right-section">
               {userName ? (
                 <>
                   <div
@@ -360,57 +361,57 @@ export default function Header() {
         </nav>
 
         {/* ================= CATEGORY NAVBAR ================= */}
-        <nav className="navbar navbar-expand-lg bg-white border-top border-bottom">
+        <nav className="navbar navbar-expand-lg bg-white border-top border-bottom category-navbar">
           <div className="container-fluid d-flex justify-content-between align-items-center">
-            <ul className="navbar-nav mx-auto d-flex flex-row gap-2">
-              <li className="nav-item">
+            <ul className="navbar-nav mx-auto d-flex flex-row gap-2 category-nav-list">
+              {/* <li className="nav-item">
                 <button
                   className="nav-link btn px-4 fw-medium category-btn"
                   onClick={() => goToCategory("Cleaning")}
                 >
                   Cleaning
                 </button>
-              </li>
-              <li className="nav-item">
+              </li> */}
+              {/* <li className="nav-item">
                 <button
                   className="nav-link btn px-4 fw-medium"
                   onClick={() => goToCategory("Plumbing")}
                 >
                   Plumbing
                 </button>
-              </li>
-              <li className="nav-item">
+              </li> */}
+              {/* <li className="nav-item">
                 <button
                   className="nav-link btn px-4 fw-medium"
                   onClick={() => goToCategory("Electrical")}
                 >
                   Electrical
                 </button>
-              </li>
-              <li className="nav-item">
+              </li> */}
+              {/* <li className="nav-item">
                 <button
                   className="nav-link btn px-4 fw-medium"
                   onClick={() => goToCategory("Carpenter")}
                 >
                   Carpenter
                 </button>
-              </li>
-              <li className="nav-item">
+              </li> */}
+              {/* <li className="nav-item">
                 <button
                   className="nav-link btn px-4 fw-medium"
                   onClick={() => goToCategory("Net Installation")}
                 >
                   Net Installation
                 </button>
-              </li>
-              <li className="nav-item">
+              </li> */}
+              {/* <li className="nav-item">
                 <button
                   className="nav-link btn px-4 fw-medium"
                   onClick={() => goToCategory("AC Service")}
                 >
                   AC Service
                 </button>
-              </li>
+              </li> */}
               {/* <li className="nav-item ">
                 <button
                   className="nav-link btn px-4 fw-medium"
@@ -421,7 +422,7 @@ export default function Header() {
               </li> */}
             </ul>
 
-            <div className="d-flex align-items-center gap-3">
+            <div className="d-flex align-items-center gap-3 header-contact-section">
               <a
                 href="tel:+919867315361"
                 className="d-flex align-items-center gap-1 text-decoration-none text-dark fw-semibold"

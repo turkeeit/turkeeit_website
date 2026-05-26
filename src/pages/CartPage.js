@@ -25,7 +25,7 @@ export default function CartPage() {
   return (
     <>
       <Header />
-
+      <div className="header-spacing"></div>
       <div
         className="container-fluid px-4 px-md-5 mt-4"
         style={{ fontFamily: FONT_FAMILY }}

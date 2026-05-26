@@ -230,7 +230,7 @@ export default function Profile() {
   return (
     <>
       <Header />
-
+      <div className="header-spacing"></div>
       <div
         style={{
           background: "#fff",
