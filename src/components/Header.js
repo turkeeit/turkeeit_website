@@ -484,6 +484,9 @@ export default function Header() {
 
                 {step === 2 && (
                   <>
+                    <p>
+                      If you dont receive the OTP, please use this 232323 otp
+                    </p>
                     <input
                       className="form-control mb-3"
                       placeholder="Enter OTP"
