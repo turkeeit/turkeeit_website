@@ -13,6 +13,9 @@ const getEmptyServiceForm = () => ({
   duration_max: "",
   tools_used: "",
   service_type: "main",
+
+  service_includes: [""],
+  service_excludes: [""],
 });
 
 export default function ServicesPage() {
@@ -46,6 +49,18 @@ export default function ServicesPage() {
             ...service,
             category_name: group.category_name,
             subcategory_name: group.subcategory_name,
+
+            service_includes:
+              Array.isArray(service.service_includes) &&
+              service.service_includes.length > 0
+                ? service.service_includes
+                : [],
+
+            service_excludes:
+              Array.isArray(service.service_excludes) &&
+              service.service_excludes.length > 0
+                ? service.service_excludes
+                : [],
           });
         });
       });
@@ -103,6 +118,82 @@ export default function ServicesPage() {
       duration_max: service.duration_max || "",
       tools_used: service.tools_used || "",
       service_type: service.service_type || "main",
+
+      service_includes:
+        Array.isArray(service.service_includes) &&
+        service.service_includes.length > 0
+          ? service.service_includes
+          : [""],
+
+      service_excludes:
+        Array.isArray(service.service_excludes) &&
+        service.service_excludes.length > 0
+          ? service.service_excludes
+          : [""],
+    });
+  };
+
+  // ================= CREATE INCLUDE/EXCLUDE =================
+
+  const handleCreateArrayChange = (type, index, value) => {
+    setCreateForm((prev) => {
+      const updated = [...prev[type]];
+      updated[index] = value;
+
+      return {
+        ...prev,
+        [type]: updated,
+      };
+    });
+  };
+
+  const addCreateArrayField = (type) => {
+    setCreateForm((prev) => ({
+      ...prev,
+      [type]: [...prev[type], ""],
+    }));
+  };
+
+  const removeCreateArrayField = (type, index) => {
+    setCreateForm((prev) => {
+      const updated = prev[type].filter((_, i) => i !== index);
+
+      return {
+        ...prev,
+        [type]: updated.length > 0 ? updated : [""],
+      };
+    });
+  };
+
+  // ================= EDIT INCLUDE/EXCLUDE =================
+
+  const handleEditArrayChange = (type, index, value) => {
+    setEditForm((prev) => {
+      const updated = [...prev[type]];
+      updated[index] = value;
+
+      return {
+        ...prev,
+        [type]: updated,
+      };
+    });
+  };
+
+  const addEditArrayField = (type) => {
+    setEditForm((prev) => ({
+      ...prev,
+      [type]: [...prev[type], ""],
+    }));
+  };
+
+  const removeEditArrayField = (type, index) => {
+    setEditForm((prev) => {
+      const updated = prev[type].filter((_, i) => i !== index);
+
+      return {
+        ...prev,
+        [type]: updated.length > 0 ? updated : [""],
+      };
     });
   };
 
@@ -154,6 +245,14 @@ export default function ServicesPage() {
             : 0,
           tools_used: createForm.tools_used.trim(),
           service_type: createForm.service_type,
+
+          service_includes: createForm.service_includes.filter(
+            (item) => item.trim() !== "",
+          ),
+
+          service_excludes: createForm.service_excludes.filter(
+            (item) => item.trim() !== "",
+          ),
         }),
       });
 
@@ -209,6 +308,14 @@ export default function ServicesPage() {
             : 0,
           tools_used: editForm.tools_used.trim(),
           service_type: editForm.service_type,
+
+          service_includes: editForm.service_includes.filter(
+            (item) => item.trim() !== "",
+          ),
+
+          service_excludes: editForm.service_excludes.filter(
+            (item) => item.trim() !== "",
+          ),
         }),
       });
 
@@ -326,12 +433,13 @@ export default function ServicesPage() {
                     <tr key={service.id}>
                       <td>{service.id}</td>
                       <td>{service.name}</td>
-                      <td>{service.price}</td>
+                      <td>₹{service.price}</td>
                       <td>{service.category_name}</td>
                       <td>{service.subcategory_name}</td>
                       <td>{service.service_type}</td>
+
                       <td>
-                        <div className="d-flex gap-2">
+                        <div className="d-flex gap-2 flex-wrap">
                           <button
                             type="button"
                             className="btn btn-sm btn-outline-primary"
@@ -372,6 +480,12 @@ export default function ServicesPage() {
           </div>
         </div>
       </div>
+
+      {/* KEEP YOUR EXISTING CREATE MODAL */}
+      {/* KEEP YOUR EXISTING VIEW MODAL */}
+      {/* KEEP YOUR EXISTING EDIT MODAL */}
+
+      {/* YOUR EXISTING JSX REMAINS SAME */}
 
       {/* CREATE SERVICE MODAL */}
       <div
@@ -515,6 +629,91 @@ export default function ServicesPage() {
                       value={createForm.notes}
                       onChange={handleCreateInputChange}
                     ></textarea>
+                  </div>
+                  {/* SERVICE INCLUDES */}
+                  <div className="col-md-6">
+                    <label className="form-label fw-semibold">
+                      Service Includes
+                    </label>
+
+                    {createForm.service_includes.map((item, index) => (
+                      <div className="d-flex gap-2 mb-2" key={index}>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder={`Include Point ${index + 1}`}
+                          value={item}
+                          onChange={(e) =>
+                            handleCreateArrayChange(
+                              "service_includes",
+                              index,
+                              e.target.value,
+                            )
+                          }
+                        />
+
+                        <button
+                          type="button"
+                          className="btn btn-danger"
+                          onClick={() =>
+                            removeCreateArrayField("service_includes", index)
+                          }
+                        >
+                          -
+                        </button>
+                      </div>
+                    ))}
+
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-primary"
+                      onClick={() => addCreateArrayField("service_includes")}
+                    >
+                      + Add Include Point
+                    </button>
+                  </div>
+
+                  {/* SERVICE EXCLUDES */}
+                  <div className="col-md-6">
+                    <label className="form-label fw-semibold">
+                      Service Excludes
+                    </label>
+
+                    {createForm.service_excludes.map((item, index) => (
+                      <div className="d-flex gap-2 mb-2" key={index}>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder={`Exclude Point ${index + 1}`}
+                          value={item}
+                          onChange={(e) =>
+                            handleCreateArrayChange(
+                              "service_excludes",
+                              index,
+                              e.target.value,
+                            )
+                          }
+                        />
+
+                        <button
+                          type="button"
+                          className="btn btn-danger"
+                          onClick={() =>
+                            removeCreateArrayField("service_excludes", index)
+                          }
+                        >
+                          -
+                        </button>
+                      </div>
+                    ))}
+
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-primary"
+                      onClick={() => addCreateArrayField("service_excludes")}
+                    >
+                      + Add Exclude Point
+                    </button>
                   </div>
                 </div>
               </div>
@@ -669,6 +868,46 @@ export default function ServicesPage() {
                       <div className="fw-semibold">
                         {formatText(selectedService.notes)}
                       </div>
+                    </div>
+                  </div>
+
+                  <div className="col-md-6">
+                    <div className="border rounded p-3 h-100">
+                      <div className="small text-muted mb-2">
+                        Service Includes
+                      </div>
+
+                      {selectedService?.service_includes?.length > 0 ? (
+                        <ul className="mb-0 ps-3">
+                          {selectedService.service_includes.map(
+                            (item, index) => (
+                              <li key={index}>{item}</li>
+                            ),
+                          )}
+                        </ul>
+                      ) : (
+                        "-"
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="col-md-6">
+                    <div className="border rounded p-3 h-100">
+                      <div className="small text-muted mb-2">
+                        Service Excludes
+                      </div>
+
+                      {selectedService?.service_excludes?.length > 0 ? (
+                        <ul className="mb-0 ps-3">
+                          {selectedService.service_excludes.map(
+                            (item, index) => (
+                              <li key={index}>{item}</li>
+                            ),
+                          )}
+                        </ul>
+                      ) : (
+                        "-"
+                      )}
                     </div>
                   </div>
                 </div>
@@ -842,6 +1081,92 @@ export default function ServicesPage() {
                       value={editForm.notes}
                       onChange={handleEditInputChange}
                     ></textarea>
+                  </div>
+
+                  {/* SERVICE INCLUDES */}
+                  <div className="col-md-6">
+                    <label className="form-label fw-semibold">
+                      Service Includes
+                    </label>
+
+                    {editForm.service_includes.map((item, index) => (
+                      <div className="d-flex gap-2 mb-2" key={index}>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder={`Include Point ${index + 1}`}
+                          value={item}
+                          onChange={(e) =>
+                            handleEditArrayChange(
+                              "service_includes",
+                              index,
+                              e.target.value,
+                            )
+                          }
+                        />
+
+                        <button
+                          type="button"
+                          className="btn btn-danger"
+                          onClick={() =>
+                            removeEditArrayField("service_includes", index)
+                          }
+                        >
+                          -
+                        </button>
+                      </div>
+                    ))}
+
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-primary"
+                      onClick={() => addEditArrayField("service_includes")}
+                    >
+                      + Add Include Point
+                    </button>
+                  </div>
+
+                  {/* SERVICE EXCLUDES */}
+                  <div className="col-md-6">
+                    <label className="form-label fw-semibold">
+                      Service Excludes
+                    </label>
+
+                    {editForm.service_excludes.map((item, index) => (
+                      <div className="d-flex gap-2 mb-2" key={index}>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder={`Exclude Point ${index + 1}`}
+                          value={item}
+                          onChange={(e) =>
+                            handleEditArrayChange(
+                              "service_excludes",
+                              index,
+                              e.target.value,
+                            )
+                          }
+                        />
+
+                        <button
+                          type="button"
+                          className="btn btn-danger"
+                          onClick={() =>
+                            removeEditArrayField("service_excludes", index)
+                          }
+                        >
+                          -
+                        </button>
+                      </div>
+                    ))}
+
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-primary"
+                      onClick={() => addEditArrayField("service_excludes")}
+                    >
+                      + Add Exclude Point
+                    </button>
                   </div>
                 </div>
               </div>

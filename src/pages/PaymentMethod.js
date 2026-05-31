@@ -350,7 +350,7 @@ export default function PaymentMethod() {
                   <strong>Cash on Delivery</strong>
                 </div>
 
-                <div
+                {/* <div
                   className="p-3"
                   style={{
                     border:
@@ -369,7 +369,7 @@ export default function PaymentMethod() {
                     className="me-2"
                   />
                   <strong>Online Payment</strong>
-                </div>
+                </div> */}
               </div>
 
               <div
