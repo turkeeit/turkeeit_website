@@ -1,9 +1,11 @@
 import Header from "../components/Header";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useSelector, useDispatch } from "react-redux";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createOrder } from "../redux/actions/orderActions";
+import axios from "axios";
+import { HOST } from "./../utils/host";
 
 const FONT_FAMILY = "'Inter', 'Segoe UI', sans-serif";
 
@@ -17,7 +19,7 @@ export default function BookingSlot() {
   const location = useLocation();
 
   // Available booking time slots shown in UI
-  const timeSlots = ["9:00 AM", "11:00 AM", "1:00 PM", "3:00 PM", "5:00 PM"];
+  const timeSlots = ["11:00 AM"];
 
   // Returns today's date in YYYY-MM-DD format for input[type="date"]
   const getTodayDate = () => {
@@ -74,12 +76,47 @@ export default function BookingSlot() {
   };
 
   const todayDate = getTodayDate();
-  const initialSelectedTime = getNextAvailableSlot(todayDate);
+  const initialSelectedTime = "";
 
   const [selectedDate, setSelectedDate] = useState(todayDate);
-  const [selectedTime, setSelectedTime] = useState(initialSelectedTime);
+  const [selectedTime, setSelectedTime] = useState("11:00 AM");
   const [savedDate, setSavedDate] = useState("");
   const [savedTime, setSavedTime] = useState("");
+  const [bookedDates, setBookedDates] = useState([]);
+
+  //useeffects
+
+  useEffect(() => {
+    fetchBookedSlots();
+  }, []);
+
+  const fetchBookedSlots = async () => {
+    try {
+      const response = await axios.get(`${HOST}/api/getBookedSlots`);
+      console.log("Booked Slots API response:", response.data);
+      setBookedDates(response.data);
+
+      console.log("Booked Slots:", response.data);
+    } catch (error) {
+      console.error("Failed to fetch booked slots", error);
+    }
+  };
+
+  useEffect(() => {
+    if (bookedDates.length > 0) {
+      const alreadyBooked = bookedDates.some(
+        (booking) =>
+          booking.service_date === selectedDate &&
+          booking.service_time === "11:00:00",
+      );
+
+      if (alreadyBooked) {
+        setSelectedTime("");
+      } else {
+        setSelectedTime("11:00 AM");
+      }
+    }
+  }, [bookedDates, selectedDate]);
 
   // Support both cart flow and direct buy now flow
   const buyNowItems = useMemo(() => {
@@ -123,22 +160,33 @@ export default function BookingSlot() {
 
   // Disable past slots only for today
   const isSlotDisabled = (slot) => {
-    const todayStr = getTodayDate();
-    if (selectedDate !== todayStr) return false;
+    const alreadyBooked = bookedDates.some(
+      (booking) =>
+        booking.service_date === selectedDate &&
+        booking.service_time === "11:00:00",
+    );
+    console.log("Selected Date:", selectedDate);
+    console.log("Booked Dates:", bookedDates);
 
-    const now = new Date();
-    const { hours, minutes } = convertSlotTo24Hour(slot);
-    const slotDate = new Date();
-    slotDate.setHours(hours, minutes, 0, 0);
-
-    return slotDate <= now;
+    return alreadyBooked;
   };
 
   // When date changes, auto-pick next valid slot for that date
   const handleDateChange = (e) => {
     const newDate = e.target.value;
     setSelectedDate(newDate);
-    setSelectedTime(getNextAvailableSlot(newDate));
+    // setSelectedTime(getNextAvailableSlot(newDate));
+    //set selected time
+    const alreadyBooked = bookedDates.some(
+      (booking) =>
+        booking.service_date === newDate && booking.service_time === "11:00:00",
+    );
+
+    if (alreadyBooked) {
+      setSelectedTime("");
+    } else {
+      setSelectedTime("11:00 AM");
+    }
   };
 
   // Save selected slot to state + localStorage for current booking flow
@@ -408,7 +456,11 @@ export default function BookingSlot() {
                   })}
                 </div>
 
-                {!selectedTime && (
+                {bookedDates.some(
+                  (booking) =>
+                    booking.service_date === selectedDate &&
+                    booking.service_time === "11:00:00",
+                ) && (
                   <p
                     className="text-center mt-3 mb-0"
                     style={{ color: "red", fontWeight: "500" }}

@@ -261,7 +261,7 @@
   /* SPACING */
 
   .header-spacing {
-    height: 150px;
+    height: 10px;
   }
 }
 
@@ -388,7 +388,7 @@
   /* CONTENT SPACING */
 
   .header-spacing {
-    height: 120px;
+    height: 20px;
   }
 }
 
@@ -432,7 +432,7 @@
   /* SPACING */
 
   .header-spacing {
-    height: 170px;
+    height: 10px;
   }
 }
 
@@ -468,6 +468,6 @@
   }
 
   .header-spacing {
-    height: 150px;
+    height: 10px;
   }
 }

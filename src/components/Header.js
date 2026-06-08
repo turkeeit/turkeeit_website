@@ -361,10 +361,10 @@ export default function Header() {
         </nav>
 
         {/* ================= CATEGORY NAVBAR ================= */}
-        <nav className="navbar navbar-expand-lg bg-white border-top border-bottom category-navbar">
+        {/* <nav className="navbar navbar-expand-lg bg-white border-top border-bottom category-navbar">
           <div className="container-fluid d-flex justify-content-between align-items-center">
-            <ul className="navbar-nav mx-auto d-flex flex-row gap-2 category-nav-list">
-              {/* <li className="nav-item">
+            <ul className="navbar-nav mx-auto d-flex flex-row gap-2 category-nav-list"> */}
+        {/* <li className="nav-item">
                 <button
                   className="nav-link btn px-4 fw-medium category-btn"
                   onClick={() => goToCategory("Cleaning")}
@@ -372,7 +372,7 @@ export default function Header() {
                   Cleaning
                 </button>
               </li> */}
-              {/* <li className="nav-item">
+        {/* <li className="nav-item">
                 <button
                   className="nav-link btn px-4 fw-medium"
                   onClick={() => goToCategory("Plumbing")}
@@ -380,7 +380,7 @@ export default function Header() {
                   Plumbing
                 </button>
               </li> */}
-              {/* <li className="nav-item">
+        {/* <li className="nav-item">
                 <button
                   className="nav-link btn px-4 fw-medium"
                   onClick={() => goToCategory("Electrical")}
@@ -388,7 +388,7 @@ export default function Header() {
                   Electrical
                 </button>
               </li> */}
-              {/* <li className="nav-item">
+        {/* <li className="nav-item">
                 <button
                   className="nav-link btn px-4 fw-medium"
                   onClick={() => goToCategory("Carpenter")}
@@ -396,7 +396,7 @@ export default function Header() {
                   Carpenter
                 </button>
               </li> */}
-              {/* <li className="nav-item">
+        {/* <li className="nav-item">
                 <button
                   className="nav-link btn px-4 fw-medium"
                   onClick={() => goToCategory("Net Installation")}
@@ -404,7 +404,7 @@ export default function Header() {
                   Net Installation
                 </button>
               </li> */}
-              {/* <li className="nav-item">
+        {/* <li className="nav-item">
                 <button
                   className="nav-link btn px-4 fw-medium"
                   onClick={() => goToCategory("AC Service")}
@@ -412,7 +412,7 @@ export default function Header() {
                   AC Service
                 </button>
               </li> */}
-              {/* <li className="nav-item ">
+        {/* <li className="nav-item ">
                 <button
                   className="nav-link btn px-4 fw-medium"
                   onClick={() => navigate("/blogs")}
@@ -420,7 +420,7 @@ export default function Header() {
                   Blogs
                 </button>
               </li> */}
-            </ul>
+        {/* </ul>
 
             <div className="d-flex align-items-center gap-3 header-contact-section">
               <a
@@ -442,7 +442,7 @@ export default function Header() {
               </a>
             </div>
           </div>
-        </nav>
+        </nav> */}
       </div>
 
       {/* ================= SIGN IN MODAL ================= */}
