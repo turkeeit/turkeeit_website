@@ -246,6 +246,29 @@ export default function Header() {
                   Search
                 </button>
               </div>
+              {/* Contact Section */}
+              {/* <div
+                className="d-flex align-items-center justify-content-center gap-3 mt-2 flex-wrap"
+                style={{ fontSize: "14px" }}
+              >
+                <a
+                  href="tel:+919867315361"
+                  className="text-decoration-none text-dark fw-semibold"
+                >
+                  <i className="bi bi-telephone-fill me-1"></i>
+                  +91 98673 15361
+                </a>
+
+                <a
+                  href="https://wa.me/919867315361"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-decoration-none text-success fw-semibold"
+                >
+                  <i className="bi bi-whatsapp me-1"></i>
+                  WhatsApp
+                </a>
+              </div> */}
             </div>
 
             <div className="col-3 d-flex justify-content-end align-items-center gap-3 header-right-section">
